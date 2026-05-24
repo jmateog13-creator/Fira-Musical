@@ -332,23 +332,32 @@
   .level-btn.completed::after { content: "🏆"; font-size: 1.4rem; }
 
   .btn-modal {
-    background: linear-gradient(180deg, var(--circ-daurat-clar), var(--circ-daurat));
-    border: 2px solid var(--circ-daurat-fosc);
+    background: linear-gradient(180deg, var(--circ-vermell-brillant), var(--circ-vermell-fosc));
+    border: 2.5px solid var(--circ-daurat);
     padding: 14px 36px;
     font-family: 'Cinzel', serif;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     cursor: pointer;
     margin-top: 18px;
     border-radius: 999px;
-    color: var(--circ-negre);
+    color: var(--circ-crema);
     text-transform: uppercase;
     transition: 0.2s;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 16px rgba(200,16,46,0.35);
   }
 
-  .btn-modal:hover { background: var(--circ-crema); transform: translateY(-2px); }
-  .btn-modal.secundari { background: rgba(255,255,255,0.1); color: var(--circ-crema); border-color: var(--circ-daurat); }
+  .btn-modal:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(200,16,46,0.5), 0 0 22px rgba(212,175,55,0.4); }
+  .btn-modal.secundari {
+    background: var(--circ-crema);
+    color: var(--circ-vermell-fosc);
+    border-color: var(--circ-daurat);
+    text-shadow: none;
+    box-shadow: 0 4px 12px rgba(200,16,46,0.15);
+  }
+  .btn-modal.secundari:hover { background: white; border-color: var(--circ-vermell); }
 </style>
 <script src="../../data/escalat.js" defer></script>
 </head>
