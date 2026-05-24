@@ -100,32 +100,6 @@
     font-weight: 600;
   }
 
-  .btn-reset, .btn-panell {
-    position: fixed;
-    bottom: 20px;
-    background: var(--circ-crema);
-    border: 1.5px solid var(--circ-daurat);
-    color: var(--circ-vermell-fosc);
-    padding: 8px 16px;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    border-radius: 999px;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    transition: all var(--transicio);
-    opacity: 0.75;
-    text-decoration: none;
-  }
-  .btn-reset { right: 20px; }
-  .btn-panell { right: 180px; }
-
-  .btn-reset:hover, .btn-panell:hover {
-    opacity: 1;
-    background: var(--circ-vermell);
-    color: var(--circ-crema);
-  }
-
   footer {
     margin-top: auto;
     padding-top: 32px;
@@ -165,8 +139,6 @@
   <footer>AulaTech · Ingenieria Poètica</footer>
 </div>
 
-<a class="btn-panell" href="panell.html" title="Panell docent · estadístiques">📊 Panell docent</a>
-<button class="btn-reset" id="btn-reset" title="Esborrar progrés">Reiniciar fira</button>
 
 <script>
   const CARPES = [
@@ -304,23 +276,6 @@
     document.body.appendChild(msg);
     setTimeout(() => msg.remove(), 2000);
   }
-
-  const CLAUS_LOCALS = [
-    'fira_musical_progres',
-    'derby_completed',
-    'derby_tutorial_vist',
-    'vident_played_v2',
-    'pesca_anecs_completed_v2',
-    'gran_tir_completed',
-    'fira_musical_stats'
-  ];
-
-  document.getElementById('btn-reset').addEventListener('click', () => {
-    if (confirm("Vols esborrar tot el progrés de la fira?\nAixò inclou estrelles, nivells completats i estadístiques.")) {
-      CLAUS_LOCALS.forEach(k => localStorage.removeItem(k));
-      renderPasseig();
-    }
-  });
 
   renderPasseig();
 </script>
