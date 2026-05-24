@@ -1,0 +1,13 @@
+IMAGE AND MUSIC PROMPTS - EL VIDENT DEL TEMPS
+
+STYLING:
+Vintage fairground, mystical fortune teller booth, 19th-century aesthetic, warm incandescent lights, deep velvets, ornate gold decorations.
+
+IMAGE PROMPTS:
+1. **Background**: "A vintage fortune teller tent interior, dimly lit with warm string lights, purple velvet curtains, stars and crescent moons patterns, a wooden table in the center, high detail, oil painting style."
+2. **Crystal Ball Stand**: "An ornate mahogany stand for a crystal ball, intricate gold carvings, sitting on a velvet tablecloth, flat vector art style for game UI."
+3. **Fortune Teller (The Seer)**: "A mysterious fortune teller with a headscarf, large gold hoop earrings, holding hands over a glowing crystal ball, vintage circus/fairground poster style."
+4. **Music Volume Slider Icons**: "A small vintage gramophone horn for high volume, and a muted Bell for no sound, brass steampunk style."
+
+MUSIC PROMPT:
+"Eerie and mystical carnival music, slow tempo, 3/4 waltz time, featuring a haunting accordion or calliope, tinkling bells, and a subtle wind-chime background. Dark yet inviting fairground atmosphere."

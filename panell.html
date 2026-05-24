@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panell docent — Fira Musical</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body {
+    padding: 40px 32px;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+
+  .panell-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .panell-header h1 {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    color: var(--circ-vermell);
+    text-shadow:
+      3px 3px 0 var(--circ-crema),
+      4px 4px 0 var(--circ-daurat);
+    margin: 0 0 8px;
+    letter-spacing: 0.04em;
+  }
+
+  .panell-header .subt {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    color: var(--circ-vermell-fosc);
+    text-transform: uppercase;
+  }
+
+  .resum-global {
+    max-width: 880px;
+    margin: 0 auto 32px;
+    background: var(--circ-crema);
+    border: 2.5px solid var(--circ-daurat);
+    border-radius: 16px;
+    padding: 22px 28px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    box-shadow: 0 12px 36px rgba(200,16,46,0.18);
+    position: relative;
+    overflow: hidden;
+  }
+  .resum-global::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 8px;
+    background: repeating-linear-gradient(90deg,
+      var(--circ-vermell) 0, var(--circ-vermell) 14px,
+      var(--circ-crema) 14px, var(--circ-crema) 28px);
+  }
+
+  .kpi {
+    text-align: center;
+    padding: 8px;
+  }
+
+  .kpi .num {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 2.4rem;
+    color: var(--circ-vermell);
+    line-height: 1.1;
+  }
+
+  .kpi .lab {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--circ-vermell-fosc);
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  .grid-jocs {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+  }
+
+  .targeta-joc {
+    background: var(--circ-crema);
+    border: 2.5px solid var(--circ-daurat);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(200,16,46,0.15);
+    position: relative;
+    overflow: hidden;
+    color: var(--circ-vermell-fosc);
+  }
+  .targeta-joc::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 6px;
+    background: repeating-linear-gradient(90deg,
+      var(--circ-vermell) 0, var(--circ-vermell) 10px,
+      var(--circ-crema) 10px, var(--circ-crema) 20px);
+  }
+
+  .targeta-joc h2 {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    color: var(--circ-vermell);
+    font-size: 1.4rem;
+    margin: 12px 0 6px;
+    letter-spacing: 0.02em;
+  }
+  .targeta-joc .icona { font-size: 1.6rem; margin-right: 6px; vertical-align: middle; }
+
+  .estats-fila {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .estat {
+    background: rgba(212,175,55,0.12);
+    border-left: 3px solid var(--circ-daurat);
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+  .estat .v {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 1.3rem;
+    color: var(--circ-vermell);
+    line-height: 1.1;
+  }
+  .estat .k {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--circ-vermell-fosc);
+    opacity: 0.8;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .barra-precisio {
+    margin-top: 12px;
+    height: 10px;
+    background: rgba(212,175,55,0.18);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid var(--circ-daurat);
+  }
+  .barra-precisio .farciment {
+    height: 100%;
+    background: linear-gradient(90deg, var(--circ-vermell-brillant), var(--circ-vermell));
+    border-radius: 999px;
+    transition: width 0.6s ease;
+  }
+
+  .estrelles-joc {
+    margin-top: 10px;
+    font-size: 1.4rem;
+    color: rgba(212,175,55,0.3);
+  }
+  .estrelles-joc .g { color: var(--circ-daurat); text-shadow: 0 0 10px var(--circ-daurat-clar); }
+
+  .accions {
+    max-width: 1240px;
+    margin: 40px auto 0;
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-pa {
+    background: linear-gradient(180deg, var(--circ-vermell-brillant), var(--circ-vermell-fosc));
+    border: 2.5px solid var(--circ-daurat);
+    color: var(--circ-crema);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 14px 30px;
+    border-radius: 999px;
+    cursor: pointer;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 6px 16px rgba(200,16,46,0.35);
+  }
+  .btn-pa:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(200,16,46,0.45); }
+  .btn-pa.secundari {
+    background: var(--circ-crema);
+    color: var(--circ-vermell-fosc);
+  }
+  .btn-pa.perill {
+    background: var(--circ-crema);
+    color: var(--circ-vermell);
+    border-color: var(--circ-vermell);
+  }
+  .btn-pa.perill:hover { background: var(--circ-vermell); color: var(--circ-crema); }
+
+  .ultima-sessio {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    color: var(--circ-vermell-fosc);
+    opacity: 0.7;
+    margin-top: 10px;
+  }
+
+  .sense-dades {
+    text-align: center;
+    padding: 80px 20px;
+    font-family: 'Cinzel', serif;
+    color: var(--circ-vermell-fosc);
+    opacity: 0.7;
+    grid-column: 1 / -1;
+  }
+</style>
+</head>
+<body>
+
+<div class="fons-circ"></div>
+
+<header class="panell-header">
+  <h1>📊 Panell Docent</h1>
+  <div class="subt">Estadístiques d'aprenentatge · Fira Musical</div>
+</header>
+
+<div class="resum-global" id="resum-global">
+  <div class="kpi"><div class="num" id="kpi-partides">0</div><div class="lab">Partides</div></div>
+  <div class="kpi"><div class="num" id="kpi-precisio">—</div><div class="lab">Precisió global</div></div>
+  <div class="kpi"><div class="num" id="kpi-nivells">0</div><div class="lab">Nivells completats</div></div>
+  <div class="kpi"><div class="num" id="kpi-estrelles">0/15</div><div class="lab">Estrelles totals</div></div>
+</div>
+
+<div class="grid-jocs" id="grid-jocs"></div>
+
+<div class="accions">
+  <a class="btn-pa secundari" href="index.html">⬅ TORNAR A LA FIRA</a>
+  <button class="btn-pa" onclick="exportarCSV()">⬇ EXPORTAR CSV</button>
+  <button class="btn-pa perill" onclick="resetTot()">⟲ REINICIAR DADES</button>
+</div>
+
+<script src="data/stats.js"></script>
+<script>
+  const JOCS_INFO = {
+    derby:     { nom: 'Derby de Notes',  icona: '🏇' },
+    vident:    { nom: 'La Vident',       icona: '🔮' },
+    timbalers: { nom: 'Timbalers',       icona: '🥁' },
+    pesca:     { nom: "Pesca d'Ànecs",   icona: '🦆' },
+    gran_tir:  { nom: 'El Gran Tir',     icona: '🎯' }
+  };
+
+  function formatData(iso) {
+    if (!iso) return 'mai';
+    const d = new Date(iso);
+    return d.toLocaleString('ca-ES', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  function renderEstrelles(n, max = 3) {
+    let html = '';
+    for (let i = 0; i < max; i++) html += `<span class="${i < n ? 'g' : ''}">★</span>`;
+    return html;
+  }
+
+  function renderitzar() {
+    const stats = FiraStats.obtenir();
+    const grid = document.getElementById('grid-jocs');
+    grid.innerHTML = '';
+
+    let totalPartides = 0, totalEncerts = 0, totalErrors = 0;
+    let totalNivells = 0, totalEstrelles = 0;
+
+    FiraStats.JOCS.forEach(id => {
+      const j = stats[id];
+      const info = JOCS_INFO[id];
+      totalPartides += j.partides;
+      totalEncerts  += j.encerts;
+      totalErrors   += j.errors;
+      totalNivells  += j.nivellsCompletats;
+      totalEstrelles += j.millorEstrelles;
+
+      const precisio = j.precisio !== null ? `${j.precisio}%` : '—';
+
+      const card = document.createElement('div');
+      card.className = 'targeta-joc';
+      card.innerHTML = `
+        <h2><span class="icona">${info.icona}</span>${info.nom}</h2>
+        <div class="estrelles-joc">${renderEstrelles(j.millorEstrelles)}</div>
+        <div class="estats-fila">
+          <div class="estat"><div class="v">${j.partides}</div><div class="k">Partides</div></div>
+          <div class="estat"><div class="v">${j.nivellsCompletats}</div><div class="k">Nivells</div></div>
+          <div class="estat"><div class="v">${j.encerts}</div><div class="k">Encerts</div></div>
+          <div class="estat"><div class="v">${j.errors}</div><div class="k">Errors</div></div>
+        </div>
+        <div class="barra-precisio" title="Precisió: ${precisio}">
+          <div class="farciment" style="width:${j.precisio !== null ? j.precisio : 0}%"></div>
+        </div>
+        <div class="ultima-sessio">Última sessió: ${formatData(j.ultimaSessio)}</div>
+      `;
+      grid.appendChild(card);
+    });
+
+    const totalRespostes = totalEncerts + totalErrors;
+    const precisioGlobal = totalRespostes > 0 ? Math.round((totalEncerts / totalRespostes) * 100) : null;
+
+    document.getElementById('kpi-partides').textContent = totalPartides;
+    document.getElementById('kpi-precisio').textContent = precisioGlobal !== null ? `${precisioGlobal}%` : '—';
+    document.getElementById('kpi-nivells').textContent = totalNivells;
+    document.getElementById('kpi-estrelles').textContent = `${totalEstrelles}/15`;
+
+    if (totalPartides === 0) {
+      grid.innerHTML = `<div class="sense-dades">
+        🎪 Encara no hi ha cap partida registrada.<br>
+        <small>Quan els alumnes juguin als jocs, les estadístiques apareixeran aquí.</small>
+      </div>`;
+    }
+  }
+
+  function exportarCSV() {
+    const csv = FiraStats.exportarCSV();
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fira_musical_stats_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const CLAUS_LOCALS = [
+    'fira_musical_progres',
+    'derby_completed',
+    'derby_tutorial_vist',
+    'vident_played_v2',
+    'pesca_anecs_completed_v2',
+    'gran_tir_completed',
+    'fira_musical_stats'
+  ];
+
+  function resetTot() {
+    if (confirm("Segur que vols esborrar TOTES les estadístiques i el progrés?\nAquesta acció no es pot desfer.")) {
+      CLAUS_LOCALS.forEach(k => localStorage.removeItem(k));
+      renderitzar();
+    }
+  }
+
+  renderitzar();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pesca d'Ànecs — Fira Musical</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  body {
+    margin: 0; padding: 0;
+    overflow: hidden;
+    height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    user-select: none;
+    background: var(--circ-negre);
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="%23D4AF37" stroke="%23C8102E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10a6 6 0 0 0-12 0"/><path d="M12 10v10"/><circle cx="12" cy="20" r="2"/></svg>') 16 32, auto;
+  }
+
+  #game-container {
+    width: 100%;
+    height: 100%;
+    max-width: 1180px;
+    position: relative;
+    background:
+      radial-gradient(ellipse at center, #1e5b8c 0%, #0c3556 100%);
+    border: 12px solid var(--circ-vermell);
+    box-shadow: 0 0 50px rgba(0,0,0,0.85), inset 0 0 100px rgba(0,0,0,0.4), 0 0 0 4px var(--circ-daurat);
+    overflow: hidden;
+    border-radius: 22px;
+  }
+
+  .tendal-curt {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 32px;
+    background: repeating-linear-gradient(90deg,
+      var(--circ-vermell) 0, var(--circ-vermell) 40px,
+      var(--circ-crema) 40px, var(--circ-crema) 80px);
+    border-bottom: 4px solid var(--circ-daurat);
+    z-index: 50;
+  }
+
+  .overlay {
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(200, 16, 46, 0.12) 0,
+        rgba(200, 16, 46, 0.12) 60px,
+        transparent 60px,
+        transparent 120px),
+      linear-gradient(180deg, #FFFFFF 0%, var(--circ-crema) 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 100; text-align: center;
+    padding: 50px 30px;
+    box-sizing: border-box;
+  }
+  .overlay.hidden { display: none !important; }
+
+  h1.titol-pesca {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 4rem;
+    color: var(--circ-vermell);
+    margin: 0 0 8px;
+    text-shadow:
+      3px 3px 0 var(--circ-crema),
+      5px 5px 0 var(--circ-daurat),
+      0 8px 20px rgba(0,0,0,0.2);
+    letter-spacing: 0.03em;
+  }
+
+  .subtitol-pesca {
+    font-family: 'Inter', sans-serif;
+    color: var(--circ-vermell-fosc);
+    font-size: 1.15rem;
+    margin-bottom: 30px;
+    max-width: 620px;
+  }
+
+  .nivells-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 100%;
+    max-width: 760px;
+  }
+
+  .btn-nivell {
+    background: linear-gradient(180deg, var(--circ-vermell-brillant), var(--circ-vermell));
+    border: 3px solid var(--circ-daurat);
+    color: var(--circ-crema);
+    padding: 18px 14px;
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.2s;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.3), 0 6px 14px rgba(200,16,46,0.3);
+    text-align: center;
+    display: flex; flex-direction: column;
+    gap: 4px;
+    min-height: 110px;
+    justify-content: center;
+  }
+  .btn-nivell:hover { transform: translateY(-4px); box-shadow: 0 12px 26px rgba(200,16,46,0.45), 0 0 22px rgba(212,175,55,0.5); }
+  .btn-nivell .num-nv {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    color: var(--circ-daurat-clar);
+    font-size: 1.1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+  .btn-nivell .sub-nv {
+    font-size: 0.78rem; color: var(--circ-crema); font-family: 'Inter', sans-serif;
+    opacity: 0.95;
+  }
+  .btn-nivell.completed {
+    background: linear-gradient(180deg, #66bb6a, #2e7d32);
+    border-color: var(--circ-daurat);
+  }
+  .btn-nivell.completed::after { content: " ✓"; color: var(--circ-crema); }
+
+  #pool {
+    width: 100%; height: 100%;
+    position: relative;
+    background-image:
+      radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.2) 100%),
+      repeating-linear-gradient(45deg, transparent, transparent 12px, rgba(255,255,255,0.06) 12px, rgba(255,255,255,0.06) 24px);
+    animation: water-flow 25s linear infinite;
+  }
+
+  @keyframes water-flow {
+    from { background-position: 0 0; }
+    to   { background-position: 120px 120px; }
+  }
+
+  #hud {
+    position: absolute;
+    top: 50px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(250,247,242,0.95);
+    padding: 12px 30px;
+    border-radius: 999px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    color: var(--circ-vermell-fosc);
+    display: flex; gap: 28px;
+    z-index: 10;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.5);
+    border: 2px solid var(--circ-daurat);
+    align-items: center;
+  }
+  #hud .pesca-regla {
+    background: var(--circ-vermell);
+    color: var(--circ-crema);
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #hud .pesca-regla svg { vertical-align: middle; }
+
+  .duck {
+    position: absolute;
+    width: 160px; height: 170px;
+    cursor: pointer;
+    transition: transform 0.22s;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+
+  .duck-body {
+    width: 130px; height: 130px;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
+    z-index: 1;
+  }
+
+  .duck-label {
+    padding: 4px 12px;
+    font-family: 'Alfa Slab One', serif;
+    font-size: 1.6rem;
+    text-align: center;
+    white-space: nowrap;
+    z-index: 2;
+    margin-top: -8px;
+    background: var(--circ-crema);
+    color: var(--circ-vermell-fosc);
+    border-radius: 8px;
+    border: 2px solid var(--circ-daurat);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    pointer-events: none;
+  }
+  .duck-label.figura {
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    background: var(--circ-crema);
+  }
+  .duck-label.figura svg { display:block; }
+
+  .duck:hover { transform: scale(1.08); }
+
+  @keyframes shake {
+    0%   { transform: translateX(0); }
+    25%  { transform: translateX(-6px) rotate(-5deg); }
+    50%  { transform: translateX(6px) rotate(5deg); }
+    100% { transform: translateX(0); }
+  }
+  .error-shake { animation: shake 0.2s ease-in-out 2; }
+
+  #feedback-overlay {
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(200,16,46,0.12) 0,
+        rgba(200,16,46,0.12) 60px,
+        transparent 60px,
+        transparent 120px),
+      linear-gradient(180deg, #FFFFFF 0%, var(--circ-crema) 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 30; color: var(--circ-vermell-fosc);
+    text-align: center;
+    padding: 50px;
+  }
+  #feedback-overlay h2 {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 3.2rem;
+    margin: 0 0 12px;
+    letter-spacing: 0.03em;
+    color: var(--circ-vermell);
+    text-shadow: 3px 3px 0 var(--circ-crema), 4px 4px 0 var(--circ-daurat);
+  }
+  #feedback-overlay p { font-family: 'Inter', sans-serif; font-size: 1.15rem; color: var(--circ-vermell-fosc); }
+
+  .btn-final {
+    background: linear-gradient(180deg, var(--circ-vermell-brillant), var(--circ-vermell-fosc));
+    border: 2.5px solid var(--circ-daurat);
+    color: var(--circ-crema);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 14px 32px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    transition: all 0.2s;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 16px rgba(200,16,46,0.35);
+  }
+  .btn-final:hover { transform: translateY(-2px); box-shadow: 0 0 24px var(--circ-daurat), 0 8px 22px rgba(200,16,46,0.45); }
+  .btn-final.secundari {
+    background: var(--circ-crema);
+    color: var(--circ-vermell-fosc);
+    border-color: var(--circ-daurat);
+    text-shadow: none;
+  }
+
+  .hidden { display: none !important; }
+</style>
+<script src="../../data/escalat.js" defer></script>
+</head>
+<body>
+
+<div id="game-container">
+  <div class="tendal-curt"></div>
+
+  <div id="start-screen" class="overlay">
+    <h1 class="titol-pesca">🦆 PESCA D'ÀNECS 🦆</h1>
+    <p class="subtitol-pesca">Cada nivell té una <strong style="color:var(--circ-daurat-clar);">regla</strong>: pesca només els ànecs que la compleixen. Si pesques un que no toca, perds una vida. Arriba a 10 encerts per guanyar.</p>
+    <div class="nivells-grid" id="nivells-grid"></div>
+    <div style="margin-top: 28px;">
+      <button class="btn-final secundari" onclick="sortirAFira()">⬅ TORNAR A LA FIRA</button>
+    </div>
+  </div>
+
+  <div id="pool" class="hidden">
+    <div id="hud">
+      <span>🎯 <span id="score">0</span>/10</span>
+      <span class="pesca-regla" id="regla-actual">PESCA…</span>
+      <span>❤️ <span id="lives">3</span></span>
+      <span class="pill" style="cursor:pointer; background:rgba(0,0,0,0.1); padding:4px 12px; border-radius:999px; font-size:0.8rem;" onclick="sortirAFira()">⬅</span>
+    </div>
+  </div>
+
+  <div id="feedback-overlay" style="display:none;">
+    <h2 id="end-title"></h2>
+    <p id="end-msg"></p>
+    <div style="margin-top:24px;">
+      <button class="btn-final" onclick="tornarMenu()">SEGÜENT</button>
+      <button class="btn-final secundari" onclick="sortirAFira()">⬅ FIRA</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../data/notes.js"></script>
+<script src="../../data/figures.js"></script>
+<script src="../../data/stats.js"></script>
+<script>
+
+  const STORAGE_KEY = 'fira_musical_progres';
+  function carregarProgresGlobal() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+  function desarEstrellesJoc(idJoc, estrelles) {
+    const p = carregarProgresGlobal();
+    p[idJoc] = Math.max(p[idJoc] || 0, estrelles);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  }
+  function sortirAFira() { window.location.href = '../../index.html'; }
+
+  const N = window.FIRA_NOTES;
+  const F = window.FIRA_FIGURES;
+
+  const reglaSvg = (figId) => F.svgFigura(F.MAPA[figId], { ample: 22, alt: 36, color: '#FFFFFF' });
+
+  const NIVELLS = [
+    {
+      id: 'negres',
+      nom: 'Només NEGRES',
+      sub: 'figures rítmiques',
+      regla: 'PESCA les NEGRES ' + reglaSvg('negra'),
+      generador: () => {
+        const fig = F.aleatoria();
+        return { label: F.svgFigura(fig, { ample: 30, alt: 48, color: '#C8102E' }), classe: 'figura', isCorrect: fig.id === 'negra' };
+      }
+    },
+    {
+      id: 'corxeres',
+      nom: 'Només CORXERES',
+      sub: 'figures rítmiques',
+      regla: 'PESCA les CORXERES ' + reglaSvg('corxera'),
+      generador: () => {
+        const fig = F.aleatoria();
+        return { label: F.svgFigura(fig, { ample: 30, alt: 48, color: '#C8102E' }), classe: 'figura', isCorrect: fig.id === 'corxera' };
+      }
+    },
+    {
+      id: 'llargues',
+      nom: 'Figures LLARGUES',
+      sub: '≥ 2 negres',
+      regla: 'PESCA les figures que duren 2 negres o més',
+      generador: () => {
+        const fig = F.aleatoria();
+        return { label: F.svgFigura(fig, { ample: 30, alt: 48, color: '#C8102E' }), classe: 'figura', isCorrect: fig.valor >= 2 };
+      }
+    },
+    {
+      id: 'notes_linia',
+      nom: 'Notes en LÍNIA',
+      sub: 'Mi · Sol · Si · Re · Fa',
+      regla: 'PESCA les notes que estan en una línia',
+      generador: () => {
+        const nota = N.aleatoria(3);
+        return { label: nota.nom + (nota.octava === 5 ? '⁵' : '⁴'), classe: 'nom', isCorrect: nota.posicio.enLinia };
+      }
+    },
+    {
+      id: 'notes_espai',
+      nom: 'Notes en ESPAI',
+      sub: 'Fa · La · Do · Mi',
+      regla: 'PESCA les notes que estan en un espai',
+      generador: () => {
+        const nota = N.aleatoria(3);
+        return { label: nota.nom + (nota.octava === 5 ? '⁵' : '⁴'), classe: 'nom', isCorrect: !nota.posicio.enLinia && !nota.posicio.addicional };
+      }
+    },
+    {
+      id: 'notes_agudes',
+      nom: 'Notes AGUDES',
+      sub: 'octava alta (Do5 amunt)',
+      regla: 'PESCA només les notes agudes',
+      generador: () => {
+        const nota = N.aleatoria(4);
+        return { label: nota.nom + (nota.octava === 5 ? '⁵' : '⁴'), classe: 'nom', isCorrect: nota.octava === 5 };
+      }
+    }
+  ];
+
+  let nivellActual = null;
+  let nivellsCompletats = JSON.parse(localStorage.getItem('pesca_anecs_completed_v2') || '[]');
+  let score = 0, lives = 3, gameActive = false;
+  let ducks = [], spawnInterval = null, gameLoopInterval = null;
+
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+
+  function getAudio() {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function playSound(type) {
+    const audioCtx = getAudio();
+    const now = audioCtx.currentTime;
+    if (type === 'quack') {
+      const freqs = [523.25, 659.25, 783.99, 1046.50];
+      freqs.forEach((f, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now + i * 0.05);
+        gain.gain.setValueAtTime(0.2, now + i * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.05 + 0.3);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(now + i * 0.05); osc.stop(now + i * 0.05 + 0.3);
+      });
+    } else if (type === 'angry') {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.4);
+      gain.gain.setValueAtTime(0.4, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.4);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + 0.4);
+    }
+  }
+
+  function renderNivells() {
+    const grid = document.getElementById('nivells-grid');
+    grid.innerHTML = '';
+    NIVELLS.forEach((nv, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-nivell' + (nivellsCompletats.includes(nv.id) ? ' completed' : '');
+      btn.innerHTML = `
+        <div class="num-nv">N${idx + 1} · ${nv.nom}</div>
+        <div class="sub-nv">${nv.sub}</div>
+      `;
+      btn.onclick = () => startGame(nv);
+      grid.appendChild(btn);
+    });
+  }
+
+  function startGame(nivell) {
+    nivellActual = nivell;
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('pool').classList.remove('hidden');
+    document.getElementById('feedback-overlay').style.display = 'none';
+
+    document.getElementById('regla-actual').innerHTML = nivell.regla;
+
+    score = 0; lives = 3; gameActive = true; ducks = [];
+    window.FiraStats && FiraStats.registrar('pesca', 'partida_iniciada', { nivell: nivell.id });
+    updateHUD();
+    spawnInterval = setInterval(spawnDuck, 1400);
+    gameLoopInterval = requestAnimationFrame(gameLoop);
+  }
+
+  function spawnDuck() {
+    if (!gameActive) return;
+    const item = nivellActual.generador();
+
+    const el = document.createElement('div');
+    el.className = 'duck';
+    const labelClass = item.classe === 'figura' ? 'duck-label figura' : 'duck-label';
+    el.innerHTML = `<img class="duck-body" src="img/duck_normal.png" draggable="false"><div class="${labelClass}">${item.label}</div>`;
+
+    const poolH = document.getElementById('pool').clientHeight;
+    const y = 100 + Math.random() * (poolH - 280);
+    el.style.left = '-200px';
+    el.style.top = y + 'px';
+    document.getElementById('pool').appendChild(el);
+
+    const d = {
+      element: el, x: -200, y,
+      speed: 1.4 + Math.random() * 1.4,
+      isCorrect: item.isCorrect,
+      active: true,
+      wobbleOffset: Math.random() * 100
+    };
+    el.addEventListener('click', () => catchDuck(d));
+    ducks.push(d);
+  }
+
+  function gameLoop() {
+    if (!gameActive) return;
+    const now = Date.now();
+    const poolW = document.getElementById('pool').clientWidth;
+    ducks.forEach(d => {
+      if (!d.active) return;
+      d.x += d.speed;
+      const wobble = Math.sin((now / 500) + d.wobbleOffset) * 5;
+      d.element.style.left = d.x + 'px';
+      d.element.style.transform = `translateY(${wobble}px)`;
+      if (d.x > poolW + 100) {
+        d.element.remove();
+        d.active = false;
+        if (d.isCorrect) {
+          lives = Math.max(0, lives - 1);
+          updateHUD();
+          checkGameOver();
+        }
+      }
+    });
+    ducks = ducks.filter(d => d.active);
+    requestAnimationFrame(gameLoop);
+  }
+
+  function catchDuck(d) {
+    if (!gameActive || !d.active) return;
+    d.active = false;
+
+    if (d.isCorrect) {
+      score++;
+      playSound('quack');
+      window.FiraStats && FiraStats.registrar('pesca', 'encert');
+      d.element.style.transition = "all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+      d.element.style.transform = "scale(1.8) rotate(-45deg) translateY(-160px)";
+      d.element.style.opacity = "0";
+      setTimeout(() => d.element.remove(), 600);
+    } else {
+      lives--;
+      playSound('angry');
+      window.FiraStats && FiraStats.registrar('pesca', 'error');
+      d.element.querySelector('.duck-body').src = 'img/duck_wrong.png';
+      d.element.classList.add('error-shake');
+      setTimeout(() => d.element.remove(), 500);
+    }
+    updateHUD();
+    checkGameOver();
+  }
+
+  function updateHUD() {
+    document.getElementById('score').textContent = score;
+    document.getElementById('lives').textContent = lives;
+  }
+
+  function checkGameOver() {
+    if (lives <= 0) endGame(false);
+    else if (score >= 10) endGame(true);
+  }
+
+  function endGame(win) {
+    gameActive = false;
+    clearInterval(spawnInterval);
+    cancelAnimationFrame(gameLoopInterval);
+    ducks.forEach(d => { if (d.element) d.element.remove(); });
+
+    const overlay = document.getElementById('feedback-overlay');
+    const title = document.getElementById('end-title');
+    const msg = document.getElementById('end-msg');
+    overlay.style.display = 'flex';
+
+    if (win) {
+      if (!nivellsCompletats.includes(nivellActual.id)) {
+        nivellsCompletats.push(nivellActual.id);
+        localStorage.setItem('pesca_anecs_completed_v2', JSON.stringify(nivellsCompletats));
+      }
+      actualitzarEstrelles();
+      window.FiraStats && FiraStats.registrar('pesca', 'nivell_completat');
+      title.textContent = "PESCA MIRACULOSA!";
+      title.style.color = "var(--circ-daurat-clar)";
+      msg.textContent = `Has completat «${nivellActual.nom}».`;
+    } else {
+      title.textContent = "GAME OVER";
+      title.style.color = "var(--circ-vermell-brillant)";
+      msg.textContent = "T'han esquitxat massa ànecs enfadats. Torna-ho a provar!";
+    }
+  }
+
+  function actualitzarEstrelles() {
+    const n = nivellsCompletats.length;
+    let e = 0;
+    if (n >= 2) e = 1;
+    if (n >= 4) e = 2;
+    if (n >= 6) e = 3;
+    desarEstrellesJoc('pesca', e);
+    window.FiraStats && FiraStats.registrar('pesca', 'estrelles_actualitzades', { estrelles: e });
+  }
+
+  function tornarMenu() {
+    document.getElementById('feedback-overlay').style.display = 'none';
+    document.getElementById('pool').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    renderNivells();
+  }
+
+  renderNivells();
+  actualitzarEstrelles();
+</script>
+</body>
+</html>

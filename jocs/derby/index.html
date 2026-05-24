@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Derby de Notes — Fira Musical</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+
+  #game-cabinet {
+    width: 95vw;
+    height: 92vh;
+    background:
+      radial-gradient(ellipse at top, rgba(212, 175, 55, 0.18) 0%, transparent 60%),
+      linear-gradient(180deg, #2A0E14 0%, #14070A 100%);
+    border: 18px solid var(--circ-vermell-fosc);
+    border-radius: 20px;
+    box-shadow:
+      inset 0 0 60px rgba(0, 0, 0, 0.9),
+      0 0 40px rgba(200, 16, 46, 0.4),
+      0 0 0 4px var(--circ-daurat);
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 18px;
+    border-bottom: 3px double var(--circ-daurat);
+    margin-bottom: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+  }
+
+  header h1 {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 1.8rem;
+    color: #FFE082;
+    text-shadow:
+      0 2px 6px rgba(0,0,0,0.9),
+      0 0 10px rgba(255,224,130,0.8),
+      0 0 24px rgba(212,175,55,0.6);
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+
+  .pill {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1.5px solid var(--circ-daurat);
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+    color: var(--circ-crema);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .pill:hover { background: rgba(212, 175, 55, 0.2); transform: translateY(-1px); }
+  .pill .num { color: var(--circ-daurat-clar); font-weight: 700; }
+
+  #racetrack {
+    flex: 1;
+    background:
+      repeating-linear-gradient(90deg, #6B3410 0, #6B3410 80px, #8B4513 80px, #8B4513 160px);
+    border: 6px solid var(--circ-daurat);
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 20px 0;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.7);
+  }
+
+  .lane {
+    height: 100px;
+    border-bottom: 2px dashed rgba(212, 175, 55, 0.4);
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .lane:last-child { border-bottom: none; }
+
+  .runner {
+    width: 100px;
+    height: 80px;
+    position: absolute;
+    right: 10px;
+    font-size: 4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    filter: drop-shadow(4px 4px 6px rgba(0, 0, 0, 0.7));
+    transition: right 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 10;
+  }
+
+  .runner-label {
+    position: absolute;
+    top: -22px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 3px 10px;
+    border-radius: 999px;
+    color: white;
+    white-space: nowrap;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--circ-daurat);
+  }
+
+  #finish-line {
+    position: absolute;
+    left: 50px;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    background: repeating-linear-gradient(0deg,
+      var(--circ-crema), var(--circ-crema) 12px,
+      var(--circ-vermell), var(--circ-vermell) 24px);
+    z-index: 5;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.8), 0 0 20px var(--circ-daurat);
+    border-left: 2px solid var(--circ-daurat);
+    border-right: 2px solid var(--circ-daurat);
+  }
+
+  #control-panel {
+    background: linear-gradient(180deg, var(--circ-vermell-fosc) 0%, #4A0712 100%);
+    border-top: 4px solid var(--circ-daurat);
+    padding: 18px;
+    border-radius: 0 0 12px 12px;
+    height: 270px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: 12px;
+  }
+
+  #question-display {
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--circ-daurat-clar);
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    padding: 16px;
+    border: 2px solid var(--circ-daurat);
+    border-radius: 12px;
+    width: 85%;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  #question-display svg { max-height: 100px; }
+  #question-display .figura-gran { font-size: 3.5rem; line-height: 1; }
+
+  #answers-container {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ans-btn {
+    background: linear-gradient(180deg, var(--circ-crema) 0%, #E5DDD0 100%);
+    color: var(--circ-vermell-fosc);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    padding: 16px;
+    border: 3px solid var(--circ-daurat);
+    border-radius: 12px;
+    width: 24%;
+    cursor: pointer;
+    box-shadow: 0 5px 0 var(--circ-daurat-fosc), 0 8px 14px rgba(0, 0, 0, 0.5);
+    transition: 0.12s;
+  }
+
+  .ans-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--circ-daurat-fosc); }
+  .ans-btn:hover:not(:disabled) { background: white; transform: translateY(-1px); }
+  .ans-btn:disabled { cursor: default; opacity: 0.8; }
+
+  .correct {
+    background: linear-gradient(180deg, #4caf50, #2e7d32) !important;
+    border-color: #1b5e20 !important;
+    color: white !important;
+    box-shadow: 0 0 24px #4caf50 !important;
+  }
+
+  .wrong {
+    background: linear-gradient(180deg, var(--circ-vermell-brillant), var(--circ-vermell-fosc)) !important;
+    border-color: var(--circ-negre) !important;
+    color: white !important;
+    animation: shake 0.3s;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .modal {
+    position: fixed;
+    inset: 0;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(200, 16, 46, 0.12) 0,
+        rgba(200, 16, 46, 0.12) 60px,
+        transparent 60px,
+        transparent 120px),
+      linear-gradient(180deg, rgba(255,255,255,0.96), rgba(250,247,242,0.98));
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-box {
+    background: var(--circ-crema);
+    border: 3px double var(--circ-daurat);
+    padding: 40px 48px;
+    text-align: center;
+    border-radius: 20px;
+    max-width: 880px;
+    width: 92%;
+    box-shadow:
+      inset 0 2px 0 rgba(255,255,255,0.9),
+      0 14px 50px rgba(200, 16, 46, 0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .modal-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 14px;
+    background: repeating-linear-gradient(90deg,
+      var(--circ-vermell) 0, var(--circ-vermell) 18px,
+      var(--circ-crema) 18px, var(--circ-crema) 36px);
+    border-bottom: 2px solid var(--circ-daurat);
+  }
+
+  .modal-box h1 {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    color: var(--circ-vermell);
+    text-shadow:
+      3px 3px 0 var(--circ-crema),
+      4px 4px 0 var(--circ-daurat),
+      0 6px 16px rgba(0,0,0,0.15);
+    font-size: 2.8rem;
+    margin: 18px 0 12px;
+    letter-spacing: 0.04em;
+  }
+
+  .modal-box p { font-family: 'Inter', sans-serif; color: var(--circ-vermell-fosc); font-size: 1.1rem; }
+
+  #level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 28px;
+    width: 100%;
+  }
+
+  .level-btn {
+    background: linear-gradient(180deg, var(--circ-vermell-brillant), var(--circ-vermell));
+    border: 3px solid var(--circ-daurat);
+    color: var(--circ-crema);
+    padding: 22px 16px;
+    cursor: pointer;
+    border-radius: 12px;
+    font-family: 'Cinzel', 'Georgia', serif;
+    font-size: 1rem;
+    transition: 0.25s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    min-height: 110px;
+    text-align: center;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.3), 0 6px 16px rgba(200,16,46,0.35);
+  }
+
+  .level-btn:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 12px 28px rgba(200, 16, 46, 0.5), 0 0 24px rgba(212,175,55,0.55);
+  }
+
+  .level-btn .nivell-num {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    color: var(--circ-daurat-clar);
+    font-size: 1.3rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+
+  .level-btn.completed {
+    background: linear-gradient(180deg, #66bb6a, #2e7d32);
+    border-color: var(--circ-daurat);
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+  }
+
+  .level-btn.completed::after { content: "🏆"; font-size: 1.4rem; }
+
+  .btn-modal {
+    background: linear-gradient(180deg, var(--circ-daurat-clar), var(--circ-daurat));
+    border: 2px solid var(--circ-daurat-fosc);
+    padding: 14px 36px;
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    margin-top: 18px;
+    border-radius: 999px;
+    color: var(--circ-negre);
+    text-transform: uppercase;
+    transition: 0.2s;
+  }
+
+  .btn-modal:hover { background: var(--circ-crema); transform: translateY(-2px); }
+  .btn-modal.secundari { background: rgba(255,255,255,0.1); color: var(--circ-crema); border-color: var(--circ-daurat); }
+</style>
+<script src="../../data/escalat.js" defer></script>
+</head>
+<body>
+
+<div class="fons-circ"></div>
+
+<div id="game-cabinet">
+  <header>
+    <div class="pill" onclick="sortirAFira()">⬅ FIRA</div>
+    <h1>🏇 DERBY DE NOTES</h1>
+    <div class="pill" onclick="showMenu()">NIVELLS · <span class="num" id="wins-display">0</span>/6</div>
+  </header>
+
+  <div id="racetrack">
+    <div id="finish-line"></div>
+    <div class="lane">
+      <div class="runner" id="runner-player">
+        🏇
+        <div class="runner-label" style="color:#FFD700">TU</div>
+      </div>
+    </div>
+    <div class="lane">
+      <div class="runner" id="runner-house">
+        🐎
+        <div class="runner-label" style="color:var(--circ-vermell-brillant)">RIVAL</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="control-panel">
+    <div id="question-display">...</div>
+    <div id="answers-container"></div>
+  </div>
+</div>
+
+<div id="modal-tutorial" class="modal" style="display:none;">
+  <div class="modal-box" style="max-width: 920px;">
+    <h1>COM LLEGIR EL PENTAGRAMA</h1>
+    <p style="margin-bottom:18px;">Abans de córrer, fes un cop d'ull. Les notes es dibuixen a les <strong style="color:var(--circ-vermell);">línies</strong> i als <strong style="color:var(--circ-vermell);">espais</strong> del pentagrama.</p>
+
+    <div id="tutorial-svg" style="background:var(--circ-crema); padding:18px; border-radius:12px; border:2px solid var(--circ-daurat); margin-bottom:16px;"></div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; font-family:'Inter',sans-serif; color:var(--circ-vermell-fosc); text-align:left; max-width:780px;">
+      <div style="background:rgba(212,175,55,0.12); padding:12px 18px; border-radius:10px; border-left:4px solid var(--circ-daurat);">
+        <div style="font-family:'Cinzel',serif; font-weight:700; color:var(--circ-vermell); margin-bottom:6px;">LÍNIES (de baix a dalt)</div>
+        <div style="font-size:1.4rem; font-family:'Alfa Slab One',serif; color:var(--circ-vermell);">Mi · Sol · Si · Re · Fa</div>
+        <div style="font-size:0.85rem; opacity:0.8; margin-top:4px;">Truc: «Mi-rar-Sol-i-Si-empre-Re-treu-Fa»</div>
+      </div>
+      <div style="background:rgba(212,175,55,0.12); padding:12px 18px; border-radius:10px; border-left:4px solid var(--circ-daurat);">
+        <div style="font-family:'Cinzel',serif; font-weight:700; color:var(--circ-vermell); margin-bottom:6px;">ESPAIS (de baix a dalt)</div>
+        <div style="font-size:1.4rem; font-family:'Alfa Slab One',serif; color:var(--circ-vermell);">Fa · La · Do · Mi</div>
+        <div style="font-size:0.85rem; opacity:0.8; margin-top:4px;">Truc: «FA-cebook» o lletreja: F-A-C-E.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center;">
+      <button class="btn-modal" onclick="tancarTutorial(true)">ENTESOS, AL DERBY!</button>
+      <button class="btn-modal secundari" onclick="tancarTutorial(false)">SALTAR PER ARA</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-start" class="modal">
+  <div class="modal-box">
+    <h1>HIPÒDROM DE LA FIRA</h1>
+    <p>Escull un nivell. Encerta ràpid per avançar el cavall i guanyar la cursa.</p>
+    <div id="level-grid"></div>
+    <div style="display:flex; gap:14px; margin-top:8px;">
+      <button class="btn-modal secundari" onclick="obrirTutorial()">📖 REPASSAR PENTAGRAMA</button>
+      <button class="btn-modal secundari" onclick="sortirAFira()">⬅ TORNAR A LA FIRA</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-result" class="modal" style="display:none;">
+  <div class="modal-box">
+    <h1 id="result-title">VICTÒRIA!</h1>
+    <p id="result-msg">El teu cavall ha arribat primer!</p>
+    <div style="display:flex; gap:20px; justify-content:center; margin-top: 12px;">
+      <button class="btn-modal" onclick="showMenu()">NIVELLS</button>
+      <button class="btn-modal secundari" onclick="game.replayLevel()">REPETIR</button>
+    </div>
+  </div>
+</div>
+
+<script src="../../data/notes.js"></script>
+<script src="../../data/figures.js"></script>
+<script src="../../data/stats.js"></script>
+<script>
+
+  const STORAGE_KEY = 'fira_musical_progres';
+
+  function carregarProgresGlobal() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch { return {}; }
+  }
+
+  function desarEstrellesJoc(idJoc, estrelles) {
+    const p = carregarProgresGlobal();
+    p[idJoc] = Math.max(p[idJoc] || 0, estrelles);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  }
+
+  function sortirAFira() { window.location.href = '../../index.html'; }
+
+  const N = window.FIRA_NOTES;
+  const F = window.FIRA_FIGURES;
+
+  function svgNota(nota) {
+    return `<div style="background:rgba(250,247,242,0.95);padding:8px;border-radius:8px;width:180px;height:110px;">${N.svgPentagrama(nota, { ample: 200, alt: 110 })}</div>`;
+  }
+
+  function preguntaNota(nivell) {
+    const correcta = N.aleatoria(nivell);
+    const dist = N.distractors(correcta, 2, nivell);
+    const opcions = [correcta, ...dist];
+    return {
+      q: svgNota(correcta) + `<div style="font-family:'Cinzel',serif;width:100%;">Quina nota és?</div>`,
+      options: opcions.map(o => o.nom),
+      correct: 0,
+      _shuffleKey: correcta.nom
+    };
+  }
+
+  function preguntaFigura() {
+    const correcta = F.aleatoria();
+    const dist = F.distractors(correcta, 2);
+    return {
+      q: `<div class="figura-gran">${correcta.simbol}</div><div style="width:100%;">Quina figura és?</div>`,
+      options: [correcta.nom, ...dist.map(d => d.nom)],
+      correct: 0
+    };
+  }
+
+  function preguntaValor() {
+    const correcta = F.aleatoria();
+    const equiv = {
+      'rodona': 'Val 4 negres',
+      'blanca': 'Val 2 negres',
+      'negra':  'Val 1 pulsació',
+      'corxera': 'Val mitja negra',
+      'semicorxera': "Val un quart de negra"
+    };
+    const dist = F.distractors(correcta, 2);
+    return {
+      q: `<div style="width:100%;">Quina figura ${equiv[correcta.id].toLowerCase()}?</div>`,
+      options: [correcta.nom, ...dist.map(d => d.nom)],
+      correct: 0
+    };
+  }
+
+  function preguntaEquivalencia() {
+    const tipus = Math.random();
+    if (tipus < 0.5) {
+      const fig = F.FIGURES[Math.floor(Math.random() * 4)];
+      const correctaText = fig.simbol + ' = ' + fig.valor + ' negr' + (fig.valor === 1 ? 'a' : 'es');
+      return {
+        q: `<div style="width:100%;">Quina equivalència és correcta?</div>`,
+        options: [correctaText, fig.simbol + ' = ' + (fig.valor * 2) + ' negres', fig.simbol + ' = ' + (fig.valor / 2) + ' negres'],
+        correct: 0
+      };
+    } else {
+      const a = F.MAPA.blanca, b = F.MAPA.negra;
+      const opcionsCorr = ['Una blanca = 2 negres', 'Una rodona = 4 negres', 'Una negra = 2 corxeres', 'Una corxera = 2 semicorxeres'];
+      const opcionsErr = ['Una blanca = 4 negres', 'Una negra = 2 blanques', 'Una rodona = 2 blanques i 1 negra', 'Una corxera = 1 negra'];
+      const c = opcionsCorr[Math.floor(Math.random() * opcionsCorr.length)];
+      const e1 = opcionsErr[Math.floor(Math.random() * opcionsErr.length)];
+      let e2 = opcionsErr[Math.floor(Math.random() * opcionsErr.length)];
+      while (e2 === e1) e2 = opcionsErr[Math.floor(Math.random() * opcionsErr.length)];
+      return {
+        q: `<div style="width:100%;">Quina equivalència és correcta?</div>`,
+        options: [c, e1, e2],
+        correct: 0
+      };
+    }
+  }
+
+  function generarPool(generador, n) {
+    const pool = [];
+    for (let i = 0; i < n; i++) pool.push(generador());
+    return pool;
+  }
+
+  const NIVELLS_DERBY = [
+    {
+      nom: "Notes en línia",
+      descripcio: "Mi · Sol · Si · Re · Fa",
+      poolFn: () => generarPool(() => preguntaNota(1), 18)
+    },
+    {
+      nom: "Notes en espai",
+      descripcio: "Fa · La · Do · Mi",
+      poolFn: () => generarPool(() => preguntaNota(2), 18)
+    },
+    {
+      nom: "Pentagrama complet",
+      descripcio: "Totes les notes",
+      poolFn: () => generarPool(() => preguntaNota(3), 20)
+    },
+    {
+      nom: "Reconèixer figures",
+      descripcio: "Rodona, blanca, negra…",
+      poolFn: () => generarPool(preguntaFigura, 18)
+    },
+    {
+      nom: "Valor de les figures",
+      descripcio: "Quant val cada una?",
+      poolFn: () => generarPool(preguntaValor, 18)
+    },
+    {
+      nom: "Equivalències",
+      descripcio: "El gran repte",
+      poolFn: () => generarPool(preguntaEquivalencia, 18)
+    }
+  ];
+
+  class Game {
+    constructor() {
+      this.isPlaying = false;
+      this.audioCtx = null;
+      this.currentLevel = 0;
+      this.currentPool = [];
+      this.playerPos = 10;
+      this.housePos = 10;
+      this.finishLine = 0;
+      this.houseInterval = null;
+      this.completedLevels = this.loadCompleted();
+    }
+
+    loadCompleted() {
+      try {
+        const data = JSON.parse(localStorage.getItem('derby_completed')) || [];
+        return data.length === 6 ? data : [false, false, false, false, false, false];
+      } catch { return [false, false, false, false, false, false]; }
+    }
+
+    saveCompleted() {
+      localStorage.setItem('derby_completed', JSON.stringify(this.completedLevels));
+      const completats = this.completedLevels.filter(x => x).length;
+      let estrelles = 0;
+      if (completats >= 1) estrelles = 1;
+      if (completats >= 3) estrelles = 2;
+      if (completats >= 6) estrelles = 3;
+      desarEstrellesJoc('derby', estrelles);
+      window.FiraStats && FiraStats.registrar('derby', 'nivell_completat');
+      window.FiraStats && FiraStats.registrar('derby', 'estrelles_actualitzades', { estrelles });
+    }
+
+    initLevel(levelIdx) {
+      this.currentLevel = levelIdx;
+      document.getElementById('modal-start').style.display = 'none';
+      this.initAudio();
+      this.resetRace();
+      window.FiraStats && FiraStats.registrar('derby', 'partida_iniciada', { nivell: levelIdx });
+    }
+
+    initAudio() {
+      if (!this.audioCtx) {
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    playTone(freq, type, duration) {
+      if (!this.audioCtx) return;
+      const osc = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, this.audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, this.audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(this.audioCtx.destination);
+      osc.start();
+      osc.stop(this.audioCtx.currentTime + duration);
+    }
+
+    playFanfare() {
+      [523, 659, 783, 1046].forEach((f, i) => {
+        setTimeout(() => this.playTone(f, 'square', 0.3), i * 150);
+      });
+    }
+
+    playGallop() {
+      if (!this.audioCtx) return;
+      const bufferSize = this.audioCtx.sampleRate * 0.1;
+      const buffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+      const noise = this.audioCtx.createBufferSource();
+      noise.buffer = buffer;
+      const gain = this.audioCtx.createGain();
+      gain.gain.value = 0.1;
+      noise.connect(gain);
+      gain.connect(this.audioCtx.destination);
+      noise.start();
+    }
+
+    resetRace() {
+      document.getElementById('modal-result').style.display = 'none';
+      this.isPlaying = true;
+      this.playerPos = 10;
+      this.housePos = 10;
+      this.updatePositions();
+
+      const trackWidth = document.getElementById('racetrack').offsetWidth;
+      this.finishLine = trackWidth - 80;
+
+      this.playFanfare();
+
+      this.currentPool = NIVELLS_DERBY[this.currentLevel].poolFn();
+      this.currentPool.sort(() => Math.random() - 0.5);
+
+      this.nextQuestion();
+      this.startHouseAI();
+    }
+
+    updatePositions() {
+      document.getElementById('runner-player').style.right = this.playerPos + 'px';
+      document.getElementById('runner-house').style.right = this.housePos + 'px';
+    }
+
+    startHouseAI() {
+      if (this.houseInterval) clearInterval(this.houseInterval);
+      const baseSpeed = 0.3 + (this.currentLevel * 0.12);
+      const mistakeChance = Math.max(0.05, 0.2 - (this.currentLevel * 0.025));
+
+      this.houseInterval = setInterval(() => {
+        if (!this.isPlaying) return;
+        if (Math.random() < mistakeChance) return;
+        const speed = baseSpeed + (Math.random() * 0.5);
+        this.housePos += speed;
+        this.updatePositions();
+        if (this.housePos >= this.finishLine) this.endRace('house');
+      }, 50);
+    }
+
+    nextQuestion() {
+      if (!this.isPlaying) return;
+
+      if (this.currentPool.length === 0) {
+        this.currentPool = NIVELLS_DERBY[this.currentLevel].poolFn();
+        this.currentPool.sort(() => Math.random() - 0.5);
+      }
+
+      const q = this.currentPool.pop();
+      document.getElementById('question-display').innerHTML = q.q;
+
+      const container = document.getElementById('answers-container');
+      container.innerHTML = '';
+
+      const opts = q.options.map((t, i) => ({ txt: t, isC: i === q.correct }));
+      opts.sort(() => Math.random() - 0.5);
+
+      opts.forEach(o => {
+        const btn = document.createElement('button');
+        btn.className = 'ans-btn';
+        btn.innerText = o.txt;
+        btn.onclick = () => this.checkAnswer(o.isC, btn);
+        container.appendChild(btn);
+      });
+    }
+
+    checkAnswer(isCorrect, btnElement) {
+      if (!this.isPlaying) return;
+      document.querySelectorAll('.ans-btn').forEach(x => x.disabled = true);
+
+      if (this.audioCtx && this.audioCtx.state === 'suspended') this.audioCtx.resume();
+
+      if (isCorrect) {
+        this.playGallop();
+        this.playerPos += 42;
+        this.updatePositions();
+        btnElement.classList.add('correct');
+        window.FiraStats && FiraStats.registrar('derby', 'encert');
+
+        if (this.playerPos >= this.finishLine) this.endRace('player');
+        else setTimeout(() => this.nextQuestion(), 500);
+      } else {
+        this.playTone(150, 'sawtooth', 0.3);
+        btnElement.classList.add('wrong');
+        this.playerPos = Math.max(0, this.playerPos - 10);
+        this.updatePositions();
+        window.FiraStats && FiraStats.registrar('derby', 'error');
+        setTimeout(() => { if (this.isPlaying) this.nextQuestion(); }, 700);
+      }
+    }
+
+    endRace(winner) {
+      this.isPlaying = false;
+      clearInterval(this.houseInterval);
+
+      const modal = document.getElementById('modal-result');
+      const title = document.getElementById('result-title');
+      const msg = document.getElementById('result-msg');
+      modal.style.display = 'flex';
+
+      if (winner === 'player') {
+        this.playFanfare();
+        title.innerText = "VICTÒRIA!";
+        title.style.color = "var(--circ-daurat-clar)";
+        msg.innerText = "Has guanyat el nivell «" + NIVELLS_DERBY[this.currentLevel].nom + "».";
+        this.completedLevels[this.currentLevel] = true;
+        this.saveCompleted();
+        this.updateMenu();
+      } else {
+        this.playTone(100, 'sawtooth', 1);
+        title.innerText = "T'HA GUANYAT!";
+        title.style.color = "var(--circ-vermell-brillant)";
+        msg.innerText = "El rival ha arribat primer. Torna-ho a provar.";
+      }
+    }
+
+    replayLevel() { this.resetRace(); }
+
+    updateMenu() {
+      const grid = document.getElementById('level-grid');
+      grid.innerHTML = "";
+      const total = this.completedLevels.filter(x => x).length;
+      document.getElementById('wins-display').innerText = total;
+
+      NIVELLS_DERBY.forEach((nv, idx) => {
+        const btn = document.createElement('div');
+        btn.className = "level-btn";
+        if (this.completedLevels[idx]) btn.classList.add('completed');
+        btn.innerHTML = `
+          <div class="nivell-num">Nivell ${idx + 1}</div>
+          <div>${nv.nom}</div>
+          <div style="font-size:0.85em;color:rgba(250,247,242,0.6);">${nv.descripcio}</div>
+        `;
+        btn.onclick = () => this.initLevel(idx);
+        grid.appendChild(btn);
+      });
+    }
+  }
+
+  const game = new Game();
+
+  function showMenu() {
+    document.getElementById('modal-result').style.display = 'none';
+    game.isPlaying = false;
+    clearInterval(game.houseInterval);
+    game.updateMenu();
+    document.getElementById('modal-start').style.display = 'flex';
+  }
+
+  // ============================================================
+  // TUTORIAL — pentagrama explicat línia per línia / espai per espai
+  // ============================================================
+  function generarSvgTutorial() {
+    const w = 760, h = 200;
+    const xStart = 40, xEnd = w - 20;
+    const cyMi = 120;
+    const sep = 16;
+    const colorLin = '#5A2A1C';
+    const colorVermell = '#C8102E';
+    const colorDaurat = '#D4AF37';
+
+    const linies = [0, 1, 2, 3, 4].map(i => {
+      const y = cyMi - i * sep;
+      return `<line x1="${xStart}" y1="${y}" x2="${xEnd}" y2="${y}" stroke="${colorLin}" stroke-width="2"/>`;
+    }).join('');
+
+    const clauSol = `<g transform="translate(${xStart + 16} ${cyMi - 50}) scale(1.5)"
+                       fill="none" stroke="${colorDaurat}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                       <path d="M 11 8 C 4 14, 4 28, 12 34 C 22 40, 26 28, 18 22 C 10 18, 8 32, 14 36 L 16 54 C 16 62, 8 62, 8 56" />
+                       <circle cx="14" cy="59" r="3" fill="${colorDaurat}"/>
+                     </g>`;
+
+    // Línies: Mi (0), Sol (1), Si (2), Re (3), Fa (4) — de baix a dalt
+    const noms_linia = ['Mi', 'Sol', 'Si', 'Re', 'Fa'];
+    // Espais: Fa (0.5), La (1.5), Do (2.5), Mi (3.5)
+    const noms_espai = ['Fa', 'La', 'Do', 'Mi'];
+
+    let notes = '';
+    // Notes a les línies (cap negre)
+    noms_linia.forEach((nom, i) => {
+      const x = 180 + i * 65;
+      const y = cyMi - i * sep;
+      notes += `
+        <ellipse cx="${x}" cy="${y}" rx="9" ry="6.5" fill="${colorVermell}" transform="rotate(-20 ${x} ${y})"/>
+        <line x1="${x + 8}" y1="${y - 2}" x2="${x + 8}" y2="${y - 38}" stroke="${colorVermell}" stroke-width="2"/>
+        <text x="${x}" y="${cyMi + 50}" font-family="Alfa Slab One, Georgia, serif" font-size="20" fill="${colorVermell}" text-anchor="middle">${nom}</text>
+      `;
+    });
+    // Notes als espais (cap obert per diferenciar)
+    noms_espai.forEach((nom, i) => {
+      const x = 510 + i * 60;
+      const y = cyMi - (0.5 + i) * sep;
+      notes += `
+        <ellipse cx="${x}" cy="${y}" rx="9" ry="6.5" fill="none" stroke="${colorDaurat}" stroke-width="2.5" transform="rotate(-20 ${x} ${y})"/>
+        <line x1="${x + 8}" y1="${y - 2}" x2="${x + 8}" y2="${y - 38}" stroke="${colorDaurat}" stroke-width="2"/>
+        <text x="${x}" y="${cyMi + 50}" font-family="Alfa Slab One, Georgia, serif" font-size="20" fill="#8B6F1A" text-anchor="middle">${nom}</text>
+      `;
+    });
+
+    return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto;">
+      ${linies}${clauSol}${notes}
+      <line x1="180" y1="50" x2="180" y2="60" stroke="${colorVermell}" stroke-width="1" stroke-dasharray="2 2"/>
+      <text x="365" y="40" font-family="Cinzel, serif" font-size="14" fill="${colorVermell}" text-anchor="middle" font-weight="700" letter-spacing="2">LÍNIES (vermell)</text>
+      <text x="600" y="40" font-family="Cinzel, serif" font-size="14" fill="#8B6F1A" text-anchor="middle" font-weight="700" letter-spacing="2">ESPAIS (daurat)</text>
+    </svg>`;
+  }
+
+  function obrirTutorial() {
+    document.getElementById('tutorial-svg').innerHTML = generarSvgTutorial();
+    document.getElementById('modal-start').style.display = 'none';
+    document.getElementById('modal-tutorial').style.display = 'flex';
+  }
+
+  function tancarTutorial(marcarVist) {
+    if (marcarVist) {
+      localStorage.setItem('derby_tutorial_vist', '1');
+    }
+    document.getElementById('modal-tutorial').style.display = 'none';
+    document.getElementById('modal-start').style.display = 'flex';
+  }
+
+  window.onload = function () {
+    game.updateMenu();
+    if (!localStorage.getItem('derby_tutorial_vist')) {
+      obrirTutorial();
+    }
+  };
+</script>
+
+</body>
+</html>

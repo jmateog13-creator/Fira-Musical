@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Gran Tir de Fira — Fira Musical</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  body {
+    margin: 0; padding: 0;
+    overflow: hidden;
+    height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    user-select: none;
+    background: var(--circ-negre);
+  }
+  body.disparant, body.disparant * { cursor: none !important; }
+  body.disparant #audio-panel, body.disparant #audio-panel * { cursor: pointer !important; }
+  #crosshair { display: none; }
+  body.disparant #crosshair { display: block; }
+
+  #game-container {
+    width: 100%;
+    height: 100%;
+    max-width: 1080px;
+    position: relative;
+    background:
+      radial-gradient(ellipse at top, rgba(212,175,55,0.18) 0%, transparent 60%),
+      linear-gradient(180deg, #2A0E14 0%, #14070A 100%);
+    border: 10px solid var(--circ-vermell-fosc);
+    box-shadow: 0 0 60px rgba(0,0,0,0.9), 0 0 0 4px var(--circ-daurat);
+    overflow: hidden;
+  }
+
+  .overlay {
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(200,16,46,0.12) 0,
+        rgba(200,16,46,0.12) 60px,
+        transparent 60px,
+        transparent 120px),
+      linear-gradient(180deg, #FFFFFF 0%, var(--circ-crema) 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 100; text-align: center;
+    padding: 30px;
+    box-sizing: border-box;
+    color: var(--circ-vermell-fosc);
+  }
+  .overlay.hidden { display: none !important; }
+
+  h1.titol-tir {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 3.4rem;
+    color: var(--circ-vermell);
+    text-shadow:
+      3px 3px 0 var(--circ-crema),
+      5px 5px 0 var(--circ-daurat),
+      0 8px 22px rgba(0,0,0,0.2);
+    margin: 0 0 10px;
+    letter-spacing: 0.04em;
+  }
+
+  .subtitol-tir {
+    font-family: 'Inter', sans-serif;
+    color: var(--circ-vermell-fosc);
+    font-size: 1.05rem;
+    max-width: 660px;
+    margin-bottom: 22px;
+  }
+
+  .modes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .btn-mode {
+    background: linear-gradient(180deg, var(--circ-vermell-brillant), var(--circ-vermell));
+    border: 3px solid var(--circ-daurat);
+    color: var(--circ-crema);
+    padding: 16px 12px;
+    font-family: 'Cinzel', serif;
+    cursor: pointer;
+    border-radius: 12px;
+    transition: all 0.2s;
+    text-align: center;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.3), 0 6px 14px rgba(200,16,46,0.3);
+    display: flex; flex-direction: column;
+    gap: 4px; min-height: 96px;
+    justify-content: center;
+  }
+  .btn-mode:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(200,16,46,0.4), 0 0 22px rgba(212,175,55,0.5); }
+  .btn-mode .num-mode {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    color: var(--circ-daurat-clar);
+    font-size: 1.1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+  .btn-mode .sub-mode { font-size: 0.78rem; color: var(--circ-crema); font-family: 'Inter', sans-serif; opacity: 0.95; }
+  .btn-mode.completed {
+    background: linear-gradient(180deg, #66bb6a, #2e7d32);
+    border-color: var(--circ-daurat);
+  }
+  .btn-mode.completed::after { content: ' ✓'; color: var(--circ-crema); }
+
+  #booth {
+    width: 100%; height: 100%;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+
+  #curtain {
+    width: 100%;
+    height: 80px;
+    background: repeating-linear-gradient(90deg,
+      var(--circ-vermell) 0, var(--circ-vermell) 40px,
+      var(--circ-crema) 40px, var(--circ-crema) 80px);
+    border-bottom: 5px solid var(--circ-daurat);
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #hud {
+    background: rgba(0,0,0,0.75);
+    padding: 8px 22px;
+    border-radius: 999px;
+    border: 1.5px solid var(--circ-daurat);
+    color: var(--circ-crema);
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    display: flex;
+    gap: 22px;
+    align-items: center;
+  }
+
+  #hud .regla-pill {
+    background: var(--circ-vermell-brillant);
+    color: var(--circ-crema);
+    padding: 4px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-size: 0.95rem;
+    border: 1px solid var(--circ-daurat);
+  }
+
+  #range {
+    flex: 1;
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(74,7,18,0.4) 0%, transparent 50%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0, rgba(0,0,0,0.15) 2px, transparent 2px, transparent 18px),
+      linear-gradient(180deg, #4a2820 0%, #2a140e 100%);
+    overflow: hidden;
+  }
+
+  .shelf {
+    position: absolute;
+    width: 100%;
+    height: 16px;
+    background: var(--circ-daurat-fosc);
+    border-top: 4px solid #3e2310;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+  #shelf-1 { top: 30%; }
+  #shelf-2 { top: 55%; }
+  #shelf-3 { top: 80%; }
+
+  .target {
+    position: absolute;
+    width: 140px; height: 140px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    user-select: none;
+    cursor: none;
+  }
+
+  .target-img {
+    width: 120px; height: 120px;
+    object-fit: contain;
+    filter: drop-shadow(4px 4px 6px rgba(0,0,0,0.7));
+  }
+
+  .target-label {
+    background: var(--circ-crema);
+    color: var(--circ-vermell-fosc);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    font-family: 'Alfa Slab One', serif;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    margin-top: -16px;
+    z-index: 2;
+    border: 2px solid var(--circ-daurat);
+  }
+  .target-label.figura {
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    background: var(--circ-crema);
+  }
+  .target-label.figura svg { display:block; }
+
+  #ammo-container {
+    position: absolute;
+    bottom: 16px; right: 16px;
+    display: flex; gap: 5px;
+    z-index: 15;
+  }
+
+  .bullet {
+    width: 18px; height: 38px;
+    background: var(--circ-daurat-clar);
+    border: 1px solid var(--circ-daurat-fosc);
+    border-radius: 4px 4px 0 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .bullet.empty { background: rgba(0,0,0,0.4); border-color: #333; box-shadow: none; }
+
+  #reload-btn {
+    position: absolute;
+    bottom: 18px; left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg, var(--circ-vermell-brillant), var(--circ-vermell-fosc));
+    color: var(--circ-crema);
+    padding: 10px 28px;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: 2px solid var(--circ-daurat);
+    border-radius: 999px;
+    cursor: pointer;
+    display: none;
+    z-index: 20;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50%      { transform: translateX(-50%) scale(1.08); }
+  }
+
+  #crosshair {
+    position: fixed;
+    width: 44px; height: 44px;
+    border: 2px solid var(--circ-vermell-brillant);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 12px var(--circ-vermell-brillant);
+  }
+  #crosshair::before, #crosshair::after {
+    content: '';
+    position: absolute;
+    background: var(--circ-vermell-brillant);
+  }
+  #crosshair::before { top: 50%; left: 0; width: 100%; height: 1px; }
+  #crosshair::after  { left: 50%; top: 0; height: 100%; width: 1px; }
+
+  .btn-final {
+    background: linear-gradient(180deg, var(--circ-vermell-brillant), var(--circ-vermell-fosc));
+    border: 2.5px solid var(--circ-daurat);
+    color: var(--circ-crema);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding: 14px 30px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin: 6px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    box-shadow: 0 6px 16px rgba(200,16,46,0.35);
+  }
+  .btn-final:hover { transform: translateY(-2px); box-shadow: 0 0 22px var(--circ-daurat), 0 8px 20px rgba(200,16,46,0.45); }
+  .btn-final.secundari {
+    background: var(--circ-crema);
+    color: var(--circ-vermell-fosc);
+    border-color: var(--circ-daurat);
+    text-shadow: none;
+  }
+
+  #audio-panel {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: rgba(0,0,0,0.75);
+    padding: 8px 14px;
+    border-radius: 999px;
+    display: flex; align-items: center;
+    gap: 10px;
+    border: 1px solid var(--circ-daurat);
+    z-index: 1000;
+  }
+  #volume-slider { width: 90px; cursor: pointer; accent-color: var(--circ-daurat); }
+
+  #regla-flotant {
+    position: absolute;
+    top: 96px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,6,8,0.85);
+    border: 2px solid var(--circ-daurat);
+    color: var(--circ-daurat-clar);
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 1.2rem;
+    padding: 8px 28px;
+    border-radius: 999px;
+    z-index: 12;
+    letter-spacing: 0.03em;
+    text-align: center;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    pointer-events: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #regla-flotant svg { vertical-align: middle; }
+  #hud .regla-pill { display: inline-flex; align-items: center; gap: 6px; }
+  #hud .regla-pill svg { vertical-align: middle; }
+
+  .hidden { display: none !important; }
+</style>
+<script src="../../data/escalat.js" defer></script>
+</head>
+<body>
+
+<div id="crosshair"></div>
+
+<audio id="bg-music" loop>
+  <source src="El Shotter de la Feria.m4a" type="audio/mp4">
+</audio>
+
+<div id="game-container">
+
+  <div id="start-screen" class="overlay">
+    <h1 class="titol-tir">🎯 EL GRAN TIR DE FIRA</h1>
+    <p class="subtitol-tir">El repte final. <strong style="color:var(--circ-daurat-clar);">Notes i figures barrejades.</strong> Llegeix la regla, dispara només als objectius que la compleixen. Cada error et costa una vida. Tens <strong>6 bales</strong> per recarrega.</p>
+    <div class="modes-grid" id="modes-grid"></div>
+    <div style="margin-top:24px;">
+      <button class="btn-final secundari" onclick="sortirAFira()">⬅ TORNAR A LA FIRA</button>
+    </div>
+  </div>
+
+  <div id="booth" class="hidden">
+    <div id="curtain">
+      <div id="hud">
+        <span>🎯 <span id="score">0</span></span>
+        <span class="regla-pill" id="regla-mini">…</span>
+        <span>⏱️ <span id="time">60</span>s</span>
+        <span>❤️ <span id="lives">3</span></span>
+      </div>
+    </div>
+
+    <div id="regla-flotant">…</div>
+
+    <div id="range">
+      <div class="shelf" id="shelf-1"></div>
+      <div class="shelf" id="shelf-2"></div>
+      <div class="shelf" id="shelf-3"></div>
+    </div>
+
+    <div id="ammo-container">
+      <div class="bullet"></div><div class="bullet"></div><div class="bullet"></div>
+      <div class="bullet"></div><div class="bullet"></div><div class="bullet"></div>
+    </div>
+
+    <button id="reload-btn" onclick="reloadGun()">RECARREGAR</button>
+  </div>
+
+  <div id="feedback-overlay" class="overlay hidden">
+    <h1 class="titol-tir" id="end-title">PREMI!</h1>
+    <p class="subtitol-tir" id="end-msg"></p>
+    <div style="margin-top:18px;">
+      <button class="btn-final" onclick="tornarMenu()">SEGÜENT</button>
+      <button class="btn-final secundari" onclick="sortirAFira()">⬅ FIRA</button>
+    </div>
+  </div>
+
+  <div id="audio-panel">
+    <span style="color:white;">🔊</span>
+    <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.3">
+  </div>
+</div>
+
+<script src="../../data/notes.js"></script>
+<script src="../../data/figures.js"></script>
+<script src="../../data/stats.js"></script>
+<script>
+
+  const STORAGE_KEY = 'fira_musical_progres';
+  function carregarProgresGlobal() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+  function desarEstrellesJoc(idJoc, estrelles) {
+    const p = carregarProgresGlobal();
+    p[idJoc] = Math.max(p[idJoc] || 0, estrelles);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  }
+  function sortirAFira() { window.location.href = '../../index.html'; }
+
+  const N = window.FIRA_NOTES;
+  const F = window.FIRA_FIGURES;
+
+  function dianaFigura() {
+    const fig = F.aleatoria();
+    return { label: F.svgFigura(fig, { ample: 30, alt: 50, color: '#C8102E' }), classe: 'figura', tipus: 'figura', figura: fig };
+  }
+
+  function dianaNota() {
+    const nota = N.aleatoria(3);
+    return { label: nota.nom + (nota.octava === 5 ? '⁵' : '⁴'), classe: 'nom', tipus: 'nota', nota };
+  }
+
+  function dianaQualsevol() {
+    return Math.random() < 0.5 ? dianaFigura() : dianaNota();
+  }
+
+  const reglaSvg = (figId) => F.svgFigura(F.MAPA[figId], { ample: 20, alt: 34, color: '#FFE082' });
+
+  const MODES = [
+    {
+      id: 'figures_negres',
+      nom: 'Caçar NEGRES',
+      sub: 'negres',
+      regla: 'DISPARA a les NEGRES ' + reglaSvg('negra'),
+      generador: dianaQualsevol,
+      esCorrect: d => d.tipus === 'figura' && d.figura.id === 'negra'
+    },
+    {
+      id: 'figures_curtes',
+      nom: 'Figures CURTES',
+      sub: 'corxera + semicorxera',
+      regla: 'DISPARA a les figures CURTES ' + reglaSvg('corxera') + reglaSvg('semicorxera'),
+      generador: dianaQualsevol,
+      esCorrect: d => d.tipus === 'figura' && d.figura.valor < 1
+    },
+    {
+      id: 'figures_llargues',
+      nom: 'Figures LLARGUES',
+      sub: '≥ 2 negres',
+      regla: 'DISPARA a les figures LLARGUES ' + reglaSvg('blanca') + reglaSvg('rodona'),
+      generador: dianaQualsevol,
+      esCorrect: d => d.tipus === 'figura' && d.figura.valor >= 2
+    },
+    {
+      id: 'notes_linia',
+      nom: 'Notes en LÍNIA',
+      sub: 'Mi · Sol · Si · Re · Fa',
+      regla: 'DISPARA a les notes que estan en una línia',
+      generador: dianaQualsevol,
+      esCorrect: d => d.tipus === 'nota' && d.nota.posicio.enLinia
+    },
+    {
+      id: 'notes_so',
+      nom: 'Només DO i SOL',
+      sub: 'qualsevol octava',
+      regla: 'DISPARA només a Do i Sol',
+      generador: dianaQualsevol,
+      esCorrect: d => d.tipus === 'nota' && (d.nota.nom === 'Do' || d.nota.nom === 'Sol')
+    },
+    {
+      id: 'mix_caos',
+      nom: 'MODE CAOS',
+      sub: 'la regla canvia cada 10s',
+      regla: '',
+      generador: dianaQualsevol,
+      caos: true
+    }
+  ];
+
+  const REGLES_CAOS = MODES.slice(0, 5);
+
+  let modeActual = null;
+  let modesCompletats = JSON.parse(localStorage.getItem('gran_tir_completed') || '[]');
+  let score = 0, lives = 3, time = 60, ammo = 6, gameActive = false;
+  let targets = [], spawnInterval = null, timerInterval = null, gameLoopInterval = null;
+  let canvisCaos = null, reglaActiva = null;
+
+  const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+  function getAudio() {
+    if (!audioCtx) audioCtx = new AudioCtxClass();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function playSound(type) {
+    const audioCtx = getAudio();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+
+    if (type === 'shot') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.1);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.1);
+      osc.start(now); osc.stop(now + 0.1);
+    } else if (type === 'hit') {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(800, now);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+      osc.start(now); osc.stop(now + 0.5);
+    } else if (type === 'break') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.2);
+      osc.start(now); osc.stop(now + 0.2);
+    } else if (type === 'reload') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, now);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.05);
+      osc.start(now); osc.stop(now + 0.05);
+    } else if (type === 'empty') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(800, now);
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.05);
+      osc.start(now); osc.stop(now + 0.05);
+    }
+  }
+
+  const bgMusic = document.getElementById('bg-music');
+  const volSlider = document.getElementById('volume-slider');
+  bgMusic.volume = 0.3;
+  volSlider.addEventListener('input', e => bgMusic.volume = e.target.value);
+
+  document.addEventListener('mousemove', e => {
+    const c = document.getElementById('crosshair');
+    c.style.left = e.clientX + 'px';
+    c.style.top = e.clientY + 'px';
+  });
+
+  document.addEventListener('mousedown', e => {
+    if (!gameActive) return;
+    if (e.target.tagName === 'BUTTON') return;
+    if (e.target.closest('button, a, input, #audio-panel')) return;
+    const targetEl = e.target.closest('.target');
+    shoot(targetEl);
+  });
+
+  function renderModes() {
+    const grid = document.getElementById('modes-grid');
+    grid.innerHTML = '';
+    MODES.forEach((m, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-mode' + (modesCompletats.includes(m.id) ? ' completed' : '');
+      btn.innerHTML = `
+        <div class="num-mode">${idx + 1} · ${m.nom}</div>
+        <div class="sub-mode">${m.sub}</div>
+      `;
+      btn.onclick = () => startGame(m);
+      grid.appendChild(btn);
+    });
+  }
+
+  function startGame(mode) {
+    modeActual = mode;
+    document.getElementById('start-screen').classList.add('hidden');
+    document.getElementById('feedback-overlay').classList.add('hidden');
+    document.getElementById('booth').classList.remove('hidden');
+
+    bgMusic.play().catch(() => {});
+
+    score = 0; lives = 3; time = 60; ammo = 6;
+    gameActive = true; targets = [];
+    document.body.classList.add('disparant');
+    window.FiraStats && FiraStats.registrar('gran_tir', 'partida_iniciada', { mode: mode.id });
+    updateHUD(); updateAmmo();
+
+    if (mode.caos) {
+      reglaActiva = REGLES_CAOS[Math.floor(Math.random() * REGLES_CAOS.length)];
+      canvisCaos = setInterval(() => {
+        reglaActiva = REGLES_CAOS[Math.floor(Math.random() * REGLES_CAOS.length)];
+        actualitzarReglaUI();
+      }, 10000);
+    } else {
+      reglaActiva = mode;
+    }
+    actualitzarReglaUI();
+
+    spawnInterval = setInterval(spawnTarget, 800);
+    timerInterval = setInterval(updateTime, 1000);
+    gameLoopInterval = requestAnimationFrame(gameLoop);
+  }
+
+  function actualitzarReglaUI() {
+    document.getElementById('regla-flotant').innerHTML = reglaActiva.regla;
+    document.getElementById('regla-mini').textContent = reglaActiva.nom.replace(/^[A-Z\-\s]+·\s?/, '').trim();
+  }
+
+  function updateTime() {
+    time--;
+    document.getElementById('time').textContent = time;
+    if (time <= 0) endGame(score >= 600);
+  }
+
+  function spawnTarget() {
+    if (!gameActive) return;
+    const lane = 1 + Math.floor(Math.random() * 3);
+    const shelf = document.getElementById(`shelf-${lane}`);
+    const d = modeActual.generador();
+    const correcte = reglaActiva.esCorrect(d);
+
+    const el = document.createElement('div');
+    el.className = 'target';
+    el.style.zIndex = '100';
+    const labClass = d.classe === 'figura' ? 'target-label figura' : 'target-label';
+    el.innerHTML = `<div class="${labClass}">${d.label}</div><img src="img/diana.png" class="target-img" draggable="false">`;
+
+    const direction = Math.random() > 0.5 ? 1 : -1;
+    const startX = direction === 1 ? -160 : shelf.clientWidth + 160;
+    el.style.left = startX + 'px';
+    el.style.bottom = '10px';
+    shelf.appendChild(el);
+
+    targets.push({
+      element: el, x: startX,
+      speed: (Math.random() * 2 + 2) * direction,
+      isCorrect: correcte, active: true
+    });
+  }
+
+  function gameLoop() {
+    if (!gameActive) return;
+    const rangeW = document.getElementById('range').clientWidth;
+    targets.forEach(t => {
+      if (!t.active) return;
+      t.x += t.speed;
+      t.element.style.left = t.x + 'px';
+      if ((t.speed > 0 && t.x > rangeW + 120) || (t.speed < 0 && t.x < -120)) {
+        t.element.remove();
+        t.active = false;
+      }
+    });
+    targets = targets.filter(t => t.active);
+    requestAnimationFrame(gameLoop);
+  }
+
+  function shoot(targetEl) {
+    if (ammo <= 0) {
+      playSound('empty');
+      document.getElementById('reload-btn').style.display = 'block';
+      return;
+    }
+    ammo--;
+    updateAmmo();
+    playSound('shot');
+
+    if (!targetEl) return;
+    const t = targets.find(x => x.element === targetEl && x.active);
+    if (t) hitTarget(t);
+  }
+
+  function hitTarget(t) {
+    t.active = false;
+    if (t.isCorrect) {
+      score += 50;
+      playSound('hit');
+      window.FiraStats && FiraStats.registrar('gran_tir', 'encert');
+      t.element.style.transition = 'transform 0.2s';
+      t.element.style.transform = 'scale(0) rotate(360deg)';
+      setTimeout(() => t.element.remove(), 200);
+    } else {
+      lives--;
+      playSound('break');
+      window.FiraStats && FiraStats.registrar('gran_tir', 'error');
+      t.element.style.filter = 'grayscale(100%)';
+      t.element.innerHTML = '❌';
+      setTimeout(() => t.element.remove(), 500);
+    }
+    updateHUD();
+    checkGameOver();
+  }
+
+  function reloadGun() {
+    ammo = 6;
+    updateAmmo();
+    playSound('reload');
+    document.getElementById('reload-btn').style.display = 'none';
+  }
+
+  function updateAmmo() {
+    document.querySelectorAll('.bullet').forEach((b, i) => {
+      if (i < ammo) b.classList.remove('empty'); else b.classList.add('empty');
+    });
+  }
+
+  function updateHUD() {
+    document.getElementById('score').textContent = score;
+    document.getElementById('lives').textContent = lives;
+  }
+
+  function checkGameOver() {
+    if (lives <= 0) endGame(false);
+    else if (score >= 600 && time > 0) endGame(true);
+  }
+
+  function endGame(win) {
+    gameActive = false;
+    clearInterval(spawnInterval);
+    clearInterval(timerInterval);
+    if (canvisCaos) clearInterval(canvisCaos);
+    cancelAnimationFrame(gameLoopInterval);
+    targets.forEach(t => { if (t.element) t.element.remove(); });
+    document.body.classList.remove('disparant');
+
+    document.getElementById('booth').classList.add('hidden');
+    document.getElementById('feedback-overlay').classList.remove('hidden');
+    const title = document.getElementById('end-title');
+    const msg = document.getElementById('end-msg');
+
+    if (win) {
+      if (!modesCompletats.includes(modeActual.id)) {
+        modesCompletats.push(modeActual.id);
+        localStorage.setItem('gran_tir_completed', JSON.stringify(modesCompletats));
+      }
+      actualitzarEstrelles();
+      window.FiraStats && FiraStats.registrar('gran_tir', 'nivell_completat');
+      title.textContent = 'PREMI GROS!';
+      title.style.color = 'var(--circ-daurat-clar)';
+      msg.innerHTML = `Has aconseguit <strong>${score} punts</strong> i has completat «${modeActual.nom}».`;
+    } else {
+      title.textContent = 'GAME OVER';
+      title.style.color = 'var(--circ-vermell-brillant)';
+      msg.textContent = lives <= 0
+        ? 'Has perdut totes les vides. Mira bé la regla i torna-ho a provar.'
+        : `S'ha acabat el temps. Has fet ${score} punts (en calen 600).`;
+    }
+  }
+
+  function actualitzarEstrelles() {
+    const n = modesCompletats.length;
+    let e = 0;
+    if (n >= 1) e = 1;
+    if (n >= 3) e = 2;
+    if (n >= 5) e = 3;
+    desarEstrellesJoc('gran_tir', e);
+    window.FiraStats && FiraStats.registrar('gran_tir', 'estrelles_actualitzades', { estrelles: e });
+  }
+
+  function tornarMenu() {
+    document.getElementById('feedback-overlay').classList.add('hidden');
+    document.getElementById('booth').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    renderModes();
+  }
+
+  renderModes();
+  actualitzarEstrelles();
+</script>
+
+</body>
+</html>

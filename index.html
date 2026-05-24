@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fira Musical — Llenguatge Musical</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  .hub {
+    position: relative;
+    min-height: 100vh;
+    padding: 48px 32px 64px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 56px;
+  }
+
+  .hub-header {
+    text-align: center;
+    margin-top: 24px;
+    animation: entrada-carpa 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+
+  .hub-header h1 {
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1;
+    margin-bottom: 18px;
+  }
+
+  .hub-header .subtitol {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(14px, 1.4vw, 18px);
+    letter-spacing: 0.4em;
+    color: var(--circ-vermell);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .hub-header .info-curs {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--circ-vermell-fosc);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+
+  .marc-cartell {
+    position: relative;
+    padding: 14px 36px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.4) 100%);
+    border-top: 3px double var(--circ-daurat);
+    border-bottom: 3px double var(--circ-daurat);
+    display: inline-block;
+    margin: 8px 0;
+  }
+
+  .passeig {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    max-width: 1500px;
+    width: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 1100px) {
+    .passeig { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 720px) {
+    .passeig { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .progres-global {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 28px;
+    margin-top: 8px;
+    background: var(--circ-crema);
+    border: 2px solid var(--circ-daurat);
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(200,16,46,0.2);
+  }
+
+  .progres-global .num {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 28px;
+    color: var(--circ-vermell);
+  }
+
+  .progres-global .text {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--circ-vermell-fosc);
+    font-weight: 600;
+  }
+
+  .btn-reset, .btn-panell {
+    position: fixed;
+    bottom: 20px;
+    background: var(--circ-crema);
+    border: 1.5px solid var(--circ-daurat);
+    color: var(--circ-vermell-fosc);
+    padding: 8px 16px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all var(--transicio);
+    opacity: 0.75;
+    text-decoration: none;
+  }
+  .btn-reset { right: 20px; }
+  .btn-panell { right: 180px; }
+
+  .btn-reset:hover, .btn-panell:hover {
+    opacity: 1;
+    background: var(--circ-vermell);
+    color: var(--circ-crema);
+  }
+
+  footer {
+    margin-top: auto;
+    padding-top: 32px;
+    font-size: 11px;
+    color: var(--circ-vermell-fosc);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    text-align: center;
+    opacity: 0.55;
+  }
+</style>
+</head>
+<body>
+
+<div class="fons-circ"></div>
+
+<div class="hub">
+
+  <header class="hub-header">
+    <div class="marc-cartell">
+      <div class="subtitol">— Benvinguts a la —</div>
+    </div>
+    <h1 class="titol-circ">Fira Musical</h1>
+    <div class="marc-cartell">
+      <div class="subtitol">Llenguatge Musical · 1r i 2n d'ESO</div>
+    </div>
+    <div class="info-curs">5 atraccions · Notes &amp; Figures</div>
+  </header>
+
+  <div class="progres-global">
+    <span class="num" id="estrelles-total">0</span>
+    <span class="text">Estrelles guanyades de <span id="estrelles-max">15</span></span>
+  </div>
+
+  <div class="passeig" id="passeig"></div>
+
+  <footer>AulaTech · Ingenieria Poètica</footer>
+</div>
+
+<a class="btn-panell" href="panell.html" title="Panell docent · estadístiques">📊 Panell docent</a>
+<button class="btn-reset" id="btn-reset" title="Esborrar progrés">Reiniciar fira</button>
+
+<script>
+  const CARPES = [
+    {
+      id: 'derby',
+      nom: 'Derby de Notes',
+      icona: '🏇',
+      descripcio: 'Cursa de cavalls pel pentagrama.',
+      ruta: 'jocs/derby/index.html'
+    },
+    {
+      id: 'vident',
+      nom: 'La Vident',
+      icona: '🔮',
+      descripcio: 'Endevina la figura amb les pistes.',
+      ruta: 'jocs/vident/index.html'
+    },
+    {
+      id: 'timbalers',
+      nom: 'Timbalers',
+      icona: '🥁',
+      descripcio: 'Quin compàs és vàlid?',
+      ruta: 'jocs/timbalers/index.html'
+    },
+    {
+      id: 'pesca',
+      nom: "Pesca d'Ànecs",
+      icona: '🦆',
+      descripcio: 'Aparella les notes del pentagrama.',
+      ruta: 'jocs/pesca/index.html'
+    },
+    {
+      id: 'gran_tir',
+      nom: 'El Gran Tir',
+      icona: '🎯',
+      descripcio: 'El repte final. Tot barrejat.',
+      ruta: 'jocs/gran_tir/index.html',
+      bloquejat: true
+    }
+  ];
+
+  const STORAGE_KEY = 'fira_musical_progres';
+  const DESBLOQUEIG_GRAN_TIR = 4;
+
+  function carregarProgres() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  function estrelles(idJoc) {
+    const p = carregarProgres();
+    return p[idJoc] || 0;
+  }
+
+  function estrellesTotalsBase() {
+    return CARPES.filter(c => c.id !== 'gran_tir').reduce((t, c) => t + estrelles(c.id), 0);
+  }
+
+  function granTirDesbloquejat() {
+    return estrellesTotalsBase() >= DESBLOQUEIG_GRAN_TIR;
+  }
+
+  function renderEstrelles(n) {
+    let html = '';
+    for (let i = 0; i < 3; i++) {
+      html += `<span class="${i < n ? 'guanyada' : ''}">★</span>`;
+    }
+    return html;
+  }
+
+  function renderPasseig() {
+    const passeig = document.getElementById('passeig');
+    passeig.innerHTML = '';
+
+    CARPES.forEach((carpa, idx) => {
+      const stars = estrelles(carpa.id);
+      const bloquejat = carpa.bloquejat && !granTirDesbloquejat();
+
+      const div = document.createElement('div');
+      div.className = 'carpa entrada-carpa' + (bloquejat ? ' bloquejada' : '');
+      div.style.animationDelay = `${idx * 0.08}s`;
+
+      div.innerHTML = `
+        <div class="carpa-tendal"></div>
+        <div class="carpa-cos">
+          <div class="carpa-icona">${carpa.icona}</div>
+          <div class="carpa-nom">${carpa.nom}</div>
+          <div class="carpa-descripcio">${carpa.descripcio}</div>
+          <div class="carpa-estrelles">${renderEstrelles(stars)}</div>
+        </div>
+        ${bloquejat ? '<div class="carpa-cadenat">🔒</div>' : ''}
+      `;
+
+      div.addEventListener('click', () => {
+        if (bloquejat) {
+          mostrarMissatgeBloquejat();
+          return;
+        }
+        window.location.href = carpa.ruta;
+      });
+
+      passeig.appendChild(div);
+    });
+
+    actualitzarComptador();
+  }
+
+  function actualitzarComptador() {
+    const total = CARPES.reduce((t, c) => t + estrelles(c.id), 0);
+    const max = CARPES.length * 3;
+    document.getElementById('estrelles-total').textContent = total;
+    document.getElementById('estrelles-max').textContent = max;
+  }
+
+  function mostrarMissatgeBloquejat() {
+    const falten = DESBLOQUEIG_GRAN_TIR - estrellesTotalsBase();
+    const msg = document.createElement('div');
+    msg.className = 'panel-glass';
+    msg.style.cssText = `
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      padding: 32px 48px; z-index: 100; text-align: center;
+      animation: entrada-carpa 0.4s ease;
+    `;
+    msg.innerHTML = `
+      <div style="font-size:64px;margin-bottom:12px;">🔒</div>
+      <div class="titol-circ" style="font-size:28px;margin-bottom:10px;">Carpa bloquejada</div>
+      <div class="text-circ" style="font-size:15px;color:rgba(250,247,242,0.8);">
+        Et falten <strong style="color:var(--circ-daurat-clar)">${falten} estrelles</strong>
+        per obrir el Gran Tir.
+      </div>
+    `;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 2000);
+  }
+
+  const CLAUS_LOCALS = [
+    'fira_musical_progres',
+    'derby_completed',
+    'derby_tutorial_vist',
+    'vident_played_v2',
+    'pesca_anecs_completed_v2',
+    'gran_tir_completed',
+    'fira_musical_stats'
+  ];
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    if (confirm("Vols esborrar tot el progrés de la fira?\nAixò inclou estrelles, nivells completats i estadístiques.")) {
+      CLAUS_LOCALS.forEach(k => localStorage.removeItem(k));
+      renderPasseig();
+    }
+  });
+
+  renderPasseig();
+</script>
+
+</body>
+</html>

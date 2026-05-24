@@ -1,0 +1,50 @@
+# PROMPTS PER A "ELS TIMBALERS" (ESTIL CASINO / GAME SHOW)
+
+Estil General: Glamour, Llums de Neó, Daurats, Cortines de Vellut Vermell. Estètica de "Concurs de Televisió Retro" o "Casino de Las Vegas".
+
+## 1. ELEMENTS DEL JOC (PNG Transparent)
+
+### TIMBAL "ORQUESTRA DEL SOR" (The Container)
+**Prompt:** A luxurious orchestral timpani drum (kettle drum) made of polished copper and gold. Instead of a normal skin, the top has a glowing question mark neon sign on it. Shiny, expensive look. Isolated on transparent background.
+
+### TIMBAL "PREMI" (Obert/Correcte)
+**Prompt:** The same luxury timpani drum but open or with the top bursting with golden musical notes and confetti. Green neon glow indicating "Correct". Isolated on transparent background.
+
+### TIMBAL "ERROR" (Fallada)
+**Prompt:** The same luxury timpani drum but looking deflated or with a "Wrong" red X neon sign buzzing over it. Smoke coming out. Isolated on transparent background.
+
+---
+
+## 2. FONS (BACKGROUND) - JPG 16:9
+
+### ESCENARI PRINCIPAL (Main Stage)
+**Prompt:** A spectacular game show stage background. Red velvet curtains on the sides. In the center, a spotlight illuminatng three empty spots for the drums. Background has bokeh lights, sparkles, and a golden art-deco pattern. 1950s Casino glamour. Warm lighting.
+
+### FONS DE PREGUNTA (Quiz Overlay)
+**Prompt:** A semi-transparent overlay graphic. A stylish gold art-deco frame board where a question text matches the casino theme. Sleek and elegant.
+
+---
+
+## 3. UI EXTRAS
+
+### BOTÓ "JUGAR" (Casino Chip)
+**Prompt:** A large poker chip or casino token made of gold and red enamel. Text "PLAY" or "JUGAR" embossed in gold in the center. Shiny 3D render.
+
+### TEXTURA DE NEÓ
+**Prompt:** Neon tubes alphabet (A-Z) and numbers (0-9) in classic Vegas gold and signage style. (Optional, for creating custom titles).
+
+---
+
+## 4. MÚSICA I SO (AUDIO)
+
+### BANDA SONORA (Quiz Show Jazz)
+**Prompt:** Upbeat Big Band Jazz. Brass section (trumpets, trombones) hits, walking bass, swinging drums. Exciting "Game Show" anticipation music. Think "The Price is Right" meets "Casino Royale".
+
+### EFECTE: REDOBLE (Drumroll)
+**Prompt:** Classic orchestral snare drum roll, building tension, sudden stop.
+
+### EFECTE: PREMI (Jackpot)
+**Prompt:** Casino slot machine jackpot sound. Coins falling, bells ringing, triumphant brass fanfare.
+
+### EFECTE: ERROR (Buzzer)
+**Prompt:** Classic game show "Wrong Answer" buzzer. A low pitch brass "Wah-wah-wah" slide descending.

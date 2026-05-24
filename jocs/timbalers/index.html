@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<title>Timbalers del Compàs — Fira Musical</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at top, rgba(212,175,55,0.15) 0%, transparent 60%),
+      linear-gradient(180deg, #2A0E14 0%, #14070A 100%);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 5% 8%, var(--circ-daurat-clar) 0px, transparent 3px),
+      radial-gradient(circle at 18% 6%, var(--circ-daurat-clar) 0px, transparent 3px),
+      radial-gradient(circle at 32% 10%, var(--circ-daurat-clar) 0px, transparent 3px),
+      radial-gradient(circle at 48% 7%, var(--circ-daurat-clar) 0px, transparent 3px),
+      radial-gradient(circle at 65% 9%, var(--circ-daurat-clar) 0px, transparent 3px),
+      radial-gradient(circle at 82% 6%, var(--circ-daurat-clar) 0px, transparent 3px),
+      radial-gradient(circle at 95% 11%, var(--circ-daurat-clar) 0px, transparent 3px);
+    animation: bombetes 3s ease-in-out infinite alternate;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.6) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  #ui-container {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    box-sizing: border-box;
+    z-index: 20;
+  }
+
+  h1.titol-circ-tb {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 2.4rem;
+    color: #FFE082;
+    text-shadow:
+      0 0 10px rgba(255,224,130,0.9),
+      0 0 22px var(--circ-vermell-brillant),
+      0 0 32px rgba(212,175,55,0.5);
+    margin: 0;
+    transform: skew(-5deg);
+    letter-spacing: 0.04em;
+  }
+
+  .pill-tb {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--circ-crema);
+    background: rgba(0,0,0,0.7);
+    padding: 8px 18px;
+    border: 1.5px solid var(--circ-daurat);
+    border-radius: 999px;
+    box-shadow: 0 0 14px rgba(212,175,55,0.3);
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .pill-tb:hover { background: rgba(212,175,55,0.2); transform: translateY(-1px); }
+  .pill-tb .num { color: var(--circ-daurat-clar); font-weight: 700; }
+
+  #volume-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.65);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--circ-daurat);
+  }
+  #volume-slider { width: 90px; accent-color: var(--circ-daurat); cursor: pointer; }
+
+  #question-board {
+    position: relative;
+    z-index: 10;
+    background: linear-gradient(180deg, rgba(0,0,0,0.85), rgba(20,7,10,0.85));
+    border: 3px double var(--circ-daurat);
+    border-radius: 18px;
+    padding: 20px 40px;
+    margin-top: 70px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    max-width: 820px;
+    animation: pulseBoard 3s infinite alternate;
+  }
+
+  @keyframes pulseBoard {
+    0%   { box-shadow: 0 0 20px rgba(212,175,55,0.2); }
+    100% { box-shadow: 0 0 50px rgba(212,175,55,0.6); }
+  }
+
+  #compas-text {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 2.4rem;
+    color: #FFE082;
+    margin-bottom: 6px;
+    text-shadow:
+      0 2px 6px rgba(0,0,0,0.95),
+      0 0 12px rgba(255,224,130,0.85),
+      0 0 24px rgba(212,175,55,0.5);
+  }
+
+  #compas-text .signatura {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    color: var(--circ-crema);
+    background: rgba(200,16,46,0.4);
+    border: 2px solid var(--circ-daurat);
+    padding: 2px 14px;
+    border-radius: 8px;
+    margin-left: 12px;
+    vertical-align: middle;
+  }
+
+  #instruction-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.05rem;
+    color: rgba(250,247,242,0.75);
+    letter-spacing: 0.03em;
+  }
+
+  #stage {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    width: 920px;
+    height: 360px;
+    margin: 32px auto 0;
+    justify-content: space-between;
+    padding: 0 30px;
+    box-sizing: border-box;
+  }
+
+  .drum-container {
+    width: 240px;
+    height: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    cursor: pointer;
+    transition: transform 0.2s;
+    position: relative;
+  }
+  .drum-container:hover:not(.locked) { transform: scale(1.05) translateY(-4px); }
+  .drum-container.locked { cursor: default; }
+
+  .drum-img {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 14px rgba(0,0,0,0.6));
+  }
+
+  .drum-label {
+    width: 240px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.85), rgba(74,7,18,0.85));
+    color: var(--circ-crema);
+    font-family: 'Cinzel', serif;
+    text-align: center;
+    padding: 10px 8px;
+    text-shadow: 0 2px 4px black;
+    margin-bottom: 8px;
+    border: 2px solid var(--circ-daurat);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+  }
+
+  .drum-label .seq {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 6px;
+    height: 76px;
+  }
+  .drum-label .seq svg { filter: drop-shadow(0 0 6px rgba(212,175,55,0.5)); }
+
+  .fig-amb-valor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .fig-amb-valor .val {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--circ-crema);
+    background: rgba(0,0,0,0.5);
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid var(--circ-daurat);
+    line-height: 1.1;
+  }
+
+  .drum-label .compt {
+    margin-top: 6px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    padding: 4px 12px;
+    border-radius: 999px;
+    display: inline-block;
+    border: 1.5px solid;
+  }
+  .drum-label .compt.ok    { color: #66bb6a; border-color: #66bb6a; background: rgba(102,187,106,0.15); }
+  .drum-label .compt.curt  { color: #FFE082; border-color: #D4AF37; background: rgba(212,175,55,0.15); }
+  .drum-label .compt.llarg { color: #ef5350; border-color: #ef5350; background: rgba(239,83,80,0.15); }
+
+  #feedback-overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Alfa Slab One', serif;
+    font-size: 5rem;
+    text-shadow: 0 0 24px black;
+    z-index: 100;
+    pointer-events: none;
+    display: none;
+    letter-spacing: 0.05em;
+  }
+  .win-text  { color: var(--circ-daurat-clar); text-shadow: 0 0 20px #4caf50, 0 0 40px var(--circ-daurat); }
+  .lose-text { color: var(--circ-vermell-brillant); text-shadow: 0 0 20px var(--circ-vermell-brillant); }
+
+  #start-screen {
+    position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(90deg,
+        rgba(200,16,46,0.12) 0,
+        rgba(200,16,46,0.12) 60px,
+        transparent 60px,
+        transparent 120px),
+      linear-gradient(180deg, #FFFFFF 0%, var(--circ-crema) 100%);
+    z-index: 200;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 40px;
+  }
+
+  #start-screen h1 {
+    font-family: 'Alfa Slab One', 'Georgia', serif;
+    font-size: 4.2rem;
+    color: var(--circ-vermell);
+    text-shadow:
+      3px 3px 0 var(--circ-crema),
+      5px 5px 0 var(--circ-daurat),
+      0 8px 22px rgba(0,0,0,0.25);
+    margin: 0 0 18px;
+    transform: skew(-5deg);
+    letter-spacing: 0.04em;
+  }
+
+  #start-screen p { font-family: 'Inter', sans-serif; color: var(--circ-vermell-fosc); font-size: 1.15rem; max-width: 580px; line-height: 1.5; }
+
+  .btn-start {
+    background: linear-gradient(180deg, var(--circ-vermell-brillant), var(--circ-vermell-fosc));
+    border: 2.5px solid var(--circ-daurat);
+    color: var(--circ-crema);
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 0.18em;
+    padding: 18px 48px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-top: 30px;
+    box-shadow: 0 8px 24px rgba(200,16,46,0.4);
+    text-transform: uppercase;
+    transition: all 0.2s;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .btn-start:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 0 40px rgba(212,175,55,0.6), 0 12px 28px rgba(200,16,46,0.5); }
+  .btn-start.secundari {
+    background: var(--circ-crema);
+    color: var(--circ-vermell-fosc);
+    margin-left: 10px;
+    text-shadow: none;
+    border-color: var(--circ-daurat);
+  }
+
+  .legenda {
+    margin-top: 32px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: var(--circ-vermell-fosc);
+  }
+  .legenda strong { color: var(--circ-vermell); font-family: 'Cinzel', serif; }
+</style>
+<script src="../../data/escalat.js" defer></script>
+</head>
+<body>
+
+<audio id="bg-music" loop>
+  <source src="audio/Jackpot Jamboree.m4a" type="audio/mp4">
+</audio>
+
+<div id="start-screen">
+  <h1>ELS TIMBALERS DEL COMPÀS</h1>
+  <p>Cada nivell mostra un compàs (2/4, 3/4 o 4/4). Tres timbals revelen tres seqüències de figures. <strong style="color:var(--circ-daurat-clar);">Només una omple el compàs exactament.</strong></p>
+  <p style="margin-top:10px;font-size:0.95rem;color:rgba(250,247,242,0.65);">Tria el timbal correcte. 6 nivells, dificultat creixent.</p>
+  <div class="legenda">
+    <strong>Equivalències</strong> · rodona = 4 negres · blanca = 2 · negra = 1 · corxera = ½ · semicorxera = ¼
+  </div>
+  <div>
+    <button class="btn-start" onclick="startGame()">COMENÇAR</button>
+    <button class="btn-start secundari" onclick="sortirAFira()">⬅ FIRA</button>
+  </div>
+</div>
+
+<div id="ui-container">
+  <h1 class="titol-circ-tb">🥁 TIMBALERS</h1>
+  <div id="volume-container">
+    <span>🔊</span>
+    <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.4" oninput="setVolume(this.value)">
+  </div>
+  <div>
+    <span class="pill-tb" onclick="sortirAFira()">⬅ FIRA</span>
+    <span class="pill-tb" style="margin-left:8px;">NIVELL <span class="num" id="level-indicator">1/6</span></span>
+  </div>
+</div>
+
+<div id="question-board">
+  <div id="compas-text">OMPLE EL COMPÀS <span class="signatura" id="signatura-compas">4/4</span></div>
+  <div id="instruction-text">Quina seqüència és vàlida?</div>
+</div>
+
+<div id="stage">
+  <div class="drum-container" id="drum-0" onclick="checkAnswer(0)">
+    <div class="drum-label" id="label-0"><div class="seq">?</div><div class="compt">…</div></div>
+    <img src="img/timbal.png" class="drum-img" id="drum-img-0">
+  </div>
+  <div class="drum-container" id="drum-1" onclick="checkAnswer(1)">
+    <div class="drum-label" id="label-1"><div class="seq">?</div><div class="compt">…</div></div>
+    <img src="img/timbal.png" class="drum-img" id="drum-img-1">
+  </div>
+  <div class="drum-container" id="drum-2" onclick="checkAnswer(2)">
+    <div class="drum-label" id="label-2"><div class="seq">?</div><div class="compt">…</div></div>
+    <img src="img/timbal.png" class="drum-img" id="drum-img-2">
+  </div>
+</div>
+
+<div id="feedback-overlay">JACKPOT!</div>
+
+<script src="../../data/figures.js"></script>
+<script src="../../data/stats.js"></script>
+<script>
+
+  const STORAGE_KEY = 'fira_musical_progres';
+  function carregarProgresGlobal() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
+  function desarEstrellesJoc(idJoc, estrelles) {
+    const p = carregarProgresGlobal();
+    p[idJoc] = Math.max(p[idJoc] || 0, estrelles);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  }
+  function sortirAFira() { window.location.href = '../../index.html'; }
+
+  const F = window.FIRA_FIGURES;
+  const TOTAL_NIVELLS = 6;
+
+  const PROGRESSIO_COMPASSOS = [
+    F.COMPASSOS[0], F.COMPASSOS[0],
+    F.COMPASSOS[1], F.COMPASSOS[1],
+    F.COMPASSOS[2], F.COMPASSOS[2]
+  ];
+
+  let currentLevelIndex = 0;
+  let currentCorrectDrumId = -1;
+  let isInputLocked = true;
+  let nivellsCompletats = 0;
+
+  const bgMusic = document.getElementById('bg-music');
+  function setVolume(v) { bgMusic.volume = v; }
+  bgMusic.volume = 0.4;
+
+  function startGame() {
+    document.getElementById('start-screen').style.display = 'none';
+    bgMusic.play().catch(() => {});
+    currentLevelIndex = 0;
+    nivellsCompletats = 0;
+    window.FiraStats && FiraStats.registrar('timbalers', 'partida_iniciada');
+    loadLevel();
+  }
+
+  function formatValor(v) {
+    if (v === 4) return '4';
+    if (v === 2) return '2';
+    if (v === 1) return '1';
+    if (v === 0.5) return '½';
+    if (v === 0.25) return '¼';
+    return String(v);
+  }
+
+  function seqHtml(figures) {
+    return figures.map(f =>
+      `<span class="fig-amb-valor">
+        ${F.svgFigura(f, { ample: 26, alt: 52 })}
+        <span class="val">${formatValor(f.valor)}</span>
+      </span>`
+    ).join('');
+  }
+
+  function seqText(figures) {
+    return figures.map(f => f.nom.toLowerCase()).join(' + ');
+  }
+
+  function loadLevel() {
+    if (currentLevelIndex >= TOTAL_NIVELLS) {
+      finPartida();
+      return;
+    }
+
+    isInputLocked = true;
+    const compas = PROGRESSIO_COMPASSOS[currentLevelIndex];
+
+    document.getElementById('level-indicator').textContent = `${currentLevelIndex + 1}/${TOTAL_NIVELLS}`;
+    document.getElementById('signatura-compas').textContent = compas.etiqueta;
+    document.getElementById('instruction-text').textContent = `Quina seqüència suma exactament ${compas.pulsos} pulsacions?`;
+
+    const valid = F.generarCompasValid(compas);
+    const inv1 = F.generarCompasInvalid(compas);
+    const inv2 = F.generarCompasInvalid(compas);
+
+    while (F.validarCompas(inv1, compas) || JSON.stringify(inv1) === JSON.stringify(inv2)) {
+      const nou = F.generarCompasInvalid(compas);
+      inv1.length = 0;
+      inv1.push(...nou);
+    }
+    while (F.validarCompas(inv2, compas) || JSON.stringify(inv1) === JSON.stringify(inv2)) {
+      const nou = F.generarCompasInvalid(compas);
+      inv2.length = 0;
+      inv2.push(...nou);
+    }
+
+    currentCorrectDrumId = Math.floor(Math.random() * 3);
+    const opcions = [inv1, inv2];
+    let invIdx = 0;
+
+    for (let i = 0; i < 3; i++) {
+      const label = document.getElementById(`label-${i}`);
+      document.getElementById(`drum-img-${i}`).src = 'img/timbal.png';
+      document.getElementById(`drum-${i}`).classList.remove('locked');
+      const seq = (i === currentCorrectDrumId) ? valid : opcions[invIdx++];
+      const suma = F.sumaValors(seq);
+      label.querySelector('.seq').innerHTML = seqHtml(seq);
+      const comptEl = label.querySelector('.compt');
+      const diff = suma - compas.pulsos;
+      let estat = 'ok', sym = '=';
+      if (Math.abs(diff) > 0.001) {
+        if (diff < 0) { estat = 'curt'; sym = '<'; }
+        else { estat = 'llarg'; sym = '>'; }
+      }
+      comptEl.className = `compt ${estat}`;
+      comptEl.innerHTML = `${formatValor(suma)} ${sym} ${compas.pulsos}`;
+    }
+
+    setTimeout(() => { isInputLocked = false; }, 400);
+  }
+
+  function checkAnswer(clickedDrumId) {
+    if (isInputLocked) return;
+    isInputLocked = true;
+
+    for (let i = 0; i < 3; i++) document.getElementById(`drum-${i}`).classList.add('locked');
+
+    const drumImg = document.getElementById(`drum-img-${clickedDrumId}`);
+    const feedback = document.getElementById('feedback-overlay');
+
+    if (clickedDrumId === currentCorrectDrumId) {
+      drumImg.src = 'img/timbalcorrecte.png';
+      feedback.textContent = '✓ JACKPOT!';
+      feedback.className = 'win-text';
+      feedback.style.display = 'block';
+
+      nivellsCompletats++;
+      const est = estrellesActuals();
+      desarEstrellesJoc('timbalers', est);
+      window.FiraStats && FiraStats.registrar('timbalers', 'encert');
+      window.FiraStats && FiraStats.registrar('timbalers', 'nivell_completat');
+      window.FiraStats && FiraStats.registrar('timbalers', 'estrelles_actualitzades', { estrelles: est });
+
+      setTimeout(() => {
+        feedback.style.display = 'none';
+        currentLevelIndex++;
+        loadLevel();
+      }, 1600);
+    } else {
+      drumImg.src = 'img/timbalerror.png';
+      document.getElementById(`drum-img-${currentCorrectDrumId}`).src = 'img/timbalcorrecte.png';
+      feedback.textContent = '✗ FALLA';
+      feedback.className = 'lose-text';
+      feedback.style.display = 'block';
+      window.FiraStats && FiraStats.registrar('timbalers', 'error');
+
+      setTimeout(() => {
+        feedback.style.display = 'none';
+        loadLevel();
+      }, 2200);
+    }
+  }
+
+  function estrellesActuals() {
+    if (nivellsCompletats >= 6) return 3;
+    if (nivellsCompletats >= 4) return 2;
+    if (nivellsCompletats >= 2) return 1;
+    return 0;
+  }
+
+  function finPartida() {
+    const feedback = document.getElementById('feedback-overlay');
+    feedback.textContent = '🏆 GRAN PREMI';
+    feedback.className = 'win-text';
+    feedback.style.display = 'block';
+    feedback.style.fontSize = '4rem';
+    desarEstrellesJoc('timbalers', 3);
+    setTimeout(() => {
+      sortirAFira();
+    }, 2800);
+  }
+
+</script>
+</body>
+</html>
