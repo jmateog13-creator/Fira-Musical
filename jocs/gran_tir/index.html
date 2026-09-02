@@ -399,7 +399,6 @@
   </div>
 </div>
 
-<script src="../../data/notes.js"></script>
 <script src="../../data/figures.js"></script>
 <script src="../../data/stats.js"></script>
 <script>
@@ -413,7 +412,6 @@
   }
   function sortirAFira() { window.location.href = '../../index.html'; }
 
-  const N = window.FIRA_NOTES;
   const F = window.FIRA_FIGURES;
 
   function dianaFigura() {
@@ -421,13 +419,13 @@
     return { label: F.svgFigura(fig, { ample: 30, alt: 50, color: '#C8102E' }), classe: 'figura', tipus: 'figura', figura: fig };
   }
 
-  function dianaNota() {
-    const nota = N.aleatoria(3);
-    return { label: nota.nom + (nota.octava === 5 ? '⁵' : '⁴'), classe: 'nom', tipus: 'nota', nota };
+  function dianaSilenci() {
+    const fig = F.aleatoria();
+    return { label: `<span style="font-size:1.9rem;color:#C8102E;">${fig.silenci}</span>`, classe: 'figura', tipus: 'silenci', figura: fig };
   }
 
   function dianaQualsevol() {
-    return Math.random() < 0.5 ? dianaFigura() : dianaNota();
+    return Math.random() < 0.5 ? dianaFigura() : dianaSilenci();
   }
 
   const reglaSvg = (figId) => F.svgFigura(F.MAPA[figId], { ample: 20, alt: 34, color: '#FFE082' });
@@ -458,20 +456,20 @@
       esCorrect: d => d.tipus === 'figura' && d.figura.valor >= 2
     },
     {
-      id: 'notes_linia',
-      nom: 'Notes en LÍNIA',
-      sub: 'Mi · Sol · Si · Re · Fa',
-      regla: 'DISPARA a les notes que estan en una línia',
+      id: 'silencis',
+      nom: 'Caçar SILENCIS',
+      sub: 'qualsevol silenci',
+      regla: 'DISPARA als SILENCIS 🤫',
       generador: dianaQualsevol,
-      esCorrect: d => d.tipus === 'nota' && d.nota.posicio.enLinia
+      esCorrect: d => d.tipus === 'silenci'
     },
     {
-      id: 'notes_so',
-      nom: 'Només DO i SOL',
-      sub: 'qualsevol octava',
-      regla: 'DISPARA només a Do i Sol',
+      id: 'silenci_negra',
+      nom: 'Silenci de NEGRA',
+      sub: 'només aquest',
+      regla: 'DISPARA només al silenci de NEGRA',
       generador: dianaQualsevol,
-      esCorrect: d => d.tipus === 'nota' && (d.nota.nom === 'Do' || d.nota.nom === 'Sol')
+      esCorrect: d => d.tipus === 'silenci' && d.figura.id === 'negra'
     },
     {
       id: 'mix_caos',

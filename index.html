@@ -100,6 +100,18 @@
     font-weight: 600;
   }
 
+  .fira-menu-general {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--circ-vermell-fosc);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.16s ease, color 0.16s ease;
+  }
+  .fira-menu-general:hover { opacity: 1; color: var(--circ-vermell); }
+
 </style>
 </head>
 <body>
@@ -116,7 +128,7 @@
     <div class="marc-cartell">
       <div class="subtitol">Llenguatge Musical · 1r i 2n d'ESO</div>
     </div>
-    <div class="info-curs">5 atraccions · Notes &amp; Figures</div>
+    <div class="info-curs">5 atraccions · Figures Rítmiques</div>
   </header>
 
   <div class="progres-global">
@@ -125,6 +137,8 @@
   </div>
 
   <div class="passeig" id="passeig"></div>
+
+  <a href="../../index.html" class="fira-menu-general">‹ Menú general</a>
 </div>
 
 
@@ -132,9 +146,9 @@
   const CARPES = [
     {
       id: 'derby',
-      nom: 'Derby de Notes',
+      nom: 'Derby de Figures',
       icona: '🏇',
-      descripcio: 'Cursa de cavalls pel pentagrama.',
+      descripcio: 'Cursa de cavalls de figures rítmiques.',
       ruta: 'jocs/derby/index.html'
     },
     {
@@ -155,7 +169,7 @@
       id: 'pesca',
       nom: "Pesca d'Ànecs",
       icona: '🦆',
-      descripcio: 'Aparella les notes del pentagrama.',
+      descripcio: 'Pesca les figures i silencis correctes.',
       ruta: 'jocs/pesca/index.html'
     },
     {

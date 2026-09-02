@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>La Vident del Pentagrama — Fira Musical</title>
+<title>La Vident del Ritme — Fira Musical</title>
 <link rel="stylesheet" href="../../style.css">
 <style>
   body {
@@ -339,9 +339,9 @@
   <div class="tent-lace"></div>
 
   <div id="start-screen" class="overlay">
-    <h1 class="titol-vident">LA VIDENT DEL PENTAGRAMA</h1>
+    <h1 class="titol-vident">LA VIDENT DEL RITME</h1>
     <div class="modal-content">
-      <p style="font-size:1.3rem;color:var(--circ-vermell);font-weight:600;"><em>«Benvingut a la meva carpa. La bola revelarà secrets sobre les notes i les figures…»</em></p>
+      <p style="font-size:1.3rem;color:var(--circ-vermell);font-weight:600;"><em>«Benvingut a la meva carpa. La bola revelarà secrets sobre les figures rítmiques…»</em></p>
       <ul class="instruction-list">
         <li>La bola et donarà <strong>pistes progressives</strong> sobre un concepte musical.</li>
         <li>Endevina'l com abans millor: cada 5 segons arribarà una nova pista.</li>
@@ -387,7 +387,6 @@
   </div>
 </div>
 
-<script src="../../data/notes.js"></script>
 <script src="../../data/figures.js"></script>
 <script src="../../data/stats.js"></script>
 <script>
@@ -402,62 +401,9 @@
   function sortirAFira() { window.location.href = '../../index.html'; }
 
   const F = window.FIRA_FIGURES;
-  const N = window.FIRA_NOTES;
-
-  const CURIOSITATS_NOTA = {
-    'Do': "En la mà guidoniana medieval, sóc la nota més greu del sistema.",
-    'Re': "Sóc el «D» en anglès. La cançó «Re-do» de Sound of Music parla de mi.",
-    'Mi': "Sóc el «E» en anglès. Sóc la corda més aguda i la més greu de la guitarra.",
-    'Fa': "Sóc el «F» en anglès. La meva clau (clau de Fa) marca la zona greu.",
-    'Sol': "Sóc el «G» en anglès. La clau de Sol em dibuixa a la 2a línia.",
-    'La': "Sóc el «A» en anglès. Els músics afinen els instruments amb mi (440 Hz).",
-    'Si': "Sóc el «B» en anglès (o «H» en alemany). Soc l'última de l'escala abans del Do."
-  };
-
-  function pistesPerNota(nota) {
-    const pistes = [];
-    if (nota.posicio.addicional === 'sota') {
-      pistes.push(`Estic sota el pentagrama, en una línia addicional.`);
-    } else if (nota.posicio.addicional === 'sobre') {
-      pistes.push(`Estic sobre el pentagrama, en una línia addicional.`);
-    } else if (nota.posicio.enLinia) {
-      pistes.push(`Estic en una línia del pentagrama.`);
-    } else {
-      pistes.push(`Estic en un espai del pentagrama.`);
-    }
-    pistes.push(`El meu nom comença per la lletra «${nota.nom[0]}».`);
-    if (nota.posicio.linia) {
-      const ordinals = ['1a','2a','3a','4a','5a'];
-      pistes.push(`Soc a la ${ordinals[nota.posicio.linia - 1]} línia del pentagrama (comptant des de baix).`);
-    } else if (!nota.posicio.addicional) {
-      pistes.push(`Soc a l'octava ${nota.octava}: ${nota.octava === 5 ? "la zona aguda" : "la zona central"}.`);
-    } else {
-      pistes.push(`Soc a l'octava ${nota.octava}.`);
-    }
-    if (CURIOSITATS_NOTA[nota.nom]) {
-      pistes.push(CURIOSITATS_NOTA[nota.nom]);
-    }
-    pistes.push(`Truc mnemotècnic per les línies: Mi-Sol-Si-Re-Fa. Pels espais: Fa-La-Do-Mi.`);
-    pistes.push(`El meu nom és «${nota.nom}», però no t'ho diré més clar.`);
-    return pistes;
-  }
 
   const iconaSvg = (figId) => F.svgFigura(F.MAPA[figId], { ample: 38, alt: 64, color: '#C8102E' });
-  const iconaNotes = () => `
-    <svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" style="display:block;width:80px;height:60px;">
-      <line x1="6" y1="18" x2="94" y2="18" stroke="#5A2A1C" stroke-width="1.5"/>
-      <line x1="6" y1="28" x2="94" y2="28" stroke="#5A2A1C" stroke-width="1.5"/>
-      <line x1="6" y1="38" x2="94" y2="38" stroke="#5A2A1C" stroke-width="1.5"/>
-      <line x1="6" y1="48" x2="94" y2="48" stroke="#5A2A1C" stroke-width="1.5"/>
-      <line x1="6" y1="58" x2="94" y2="58" stroke="#5A2A1C" stroke-width="1.5"/>
-      <g transform="translate(8 0)" fill="none" stroke="#D4AF37" stroke-width="2.2" stroke-linecap="round">
-        <path d="M 11 8 C 4 14, 4 28, 12 34 C 22 40, 26 28, 18 22 C 10 18, 8 32, 14 36 L 16 54 C 16 62, 8 62, 8 56"/>
-        <circle cx="14" cy="59" r="2.5" fill="#D4AF37"/>
-      </g>
-      <ellipse cx="60" cy="38" rx="6" ry="4.5" fill="#C8102E" transform="rotate(-20 60 38)"/>
-      <line x1="65.5" y1="36" x2="65.5" y2="16" stroke="#C8102E" stroke-width="1.6"/>
-    </svg>
-  `;
+  const iconaSilenci = () => `<div style="font-size:2.6rem;color:#C8102E;">${F.MAPA.negra.silenci}</div>`;
 
   const CATEGORIES = [
     {
@@ -483,15 +429,14 @@
       }))
     },
     {
-      id: 'notes_pentagrama',
-      nom: 'Notes en clau de Sol',
-      iconaHtml: iconaNotes(),
-      descripcio: 'Do · Re · Mi · Fa · Sol · La · Si',
-      genPool: () => N.NOTES.map(n => ({
-        concepte: n.nom + (n.octava === 5 ? ' (agut)' : ''),
-        nomBase: n.nom,
-        pistes: pistesPerNota(n),
-        opcions: ['Do','Re','Mi','Fa','Sol','La','Si']
+      id: 'silencis',
+      nom: 'Els silencis',
+      iconaHtml: iconaSilenci(),
+      descripcio: 'El silenci de cada figura',
+      genPool: () => F.FIGURES.map(f => ({
+        concepte: f.nomSilenci,
+        pistes: f.pistes,
+        opcions: F.FIGURES.map(x => x.nomSilenci)
       }))
     }
   ];

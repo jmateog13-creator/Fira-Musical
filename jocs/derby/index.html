@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Derby de Notes — Fira Musical</title>
+<title>Derby de Figures — Fira Musical</title>
 <link rel="stylesheet" href="../../style.css">
 <style>
   body {
@@ -368,7 +368,7 @@
 <div id="game-cabinet">
   <header>
     <div class="pill" onclick="sortirAFira()">⬅ FIRA</div>
-    <h1>🏇 DERBY DE NOTES</h1>
+    <h1>🏇 DERBY DE FIGURES</h1>
     <div class="pill" onclick="showMenu()">NIVELLS · <span class="num" id="wins-display">0</span>/6</div>
   </header>
 
@@ -396,23 +396,10 @@
 
 <div id="modal-tutorial" class="modal" style="display:none;">
   <div class="modal-box" style="max-width: 920px;">
-    <h1>COM LLEGIR EL PENTAGRAMA</h1>
-    <p style="margin-bottom:18px;">Abans de córrer, fes un cop d'ull. Les notes es dibuixen a les <strong style="color:var(--circ-vermell);">línies</strong> i als <strong style="color:var(--circ-vermell);">espais</strong> del pentagrama.</p>
+    <h1>FIGURES I EL SEU VALOR</h1>
+    <p style="margin-bottom:18px;">Abans de córrer, repassa-les. Cada figura dura un nombre de <strong style="color:var(--circ-vermell);">pulsacions</strong> (negres), i cada una té el seu <strong style="color:var(--circ-vermell);">silenci</strong> equivalent.</p>
 
     <div id="tutorial-svg" style="background:var(--circ-crema); padding:18px; border-radius:12px; border:2px solid var(--circ-daurat); margin-bottom:16px;"></div>
-
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px; font-family:'Inter',sans-serif; color:var(--circ-vermell-fosc); text-align:left; max-width:780px;">
-      <div style="background:rgba(212,175,55,0.12); padding:12px 18px; border-radius:10px; border-left:4px solid var(--circ-daurat);">
-        <div style="font-family:'Cinzel',serif; font-weight:700; color:var(--circ-vermell); margin-bottom:6px;">LÍNIES (de baix a dalt)</div>
-        <div style="font-size:1.4rem; font-family:'Alfa Slab One',serif; color:var(--circ-vermell);">Mi · Sol · Si · Re · Fa</div>
-        <div style="font-size:0.85rem; opacity:0.8; margin-top:4px;">Truc: «Mi-rar-Sol-i-Si-empre-Re-treu-Fa»</div>
-      </div>
-      <div style="background:rgba(212,175,55,0.12); padding:12px 18px; border-radius:10px; border-left:4px solid var(--circ-daurat);">
-        <div style="font-family:'Cinzel',serif; font-weight:700; color:var(--circ-vermell); margin-bottom:6px;">ESPAIS (de baix a dalt)</div>
-        <div style="font-size:1.4rem; font-family:'Alfa Slab One',serif; color:var(--circ-vermell);">Fa · La · Do · Mi</div>
-        <div style="font-size:0.85rem; opacity:0.8; margin-top:4px;">Truc: «FA-cebook» o lletreja: F-A-C-E.</div>
-      </div>
-    </div>
 
     <div style="margin-top:24px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center;">
       <button class="btn-modal" onclick="tancarTutorial(true)">ENTESOS, AL DERBY!</button>
@@ -427,7 +414,7 @@
     <p>Escull un nivell. Encerta ràpid per avançar el cavall i guanyar la cursa.</p>
     <div id="level-grid"></div>
     <div style="display:flex; gap:14px; margin-top:8px;">
-      <button class="btn-modal secundari" onclick="obrirTutorial()">📖 REPASSAR PENTAGRAMA</button>
+      <button class="btn-modal secundari" onclick="obrirTutorial()">📖 REPASSAR FIGURES</button>
       <button class="btn-modal secundari" onclick="sortirAFira()">⬅ TORNAR A LA FIRA</button>
     </div>
   </div>
@@ -444,7 +431,6 @@
   </div>
 </div>
 
-<script src="../../data/notes.js"></script>
 <script src="../../data/figures.js"></script>
 <script src="../../data/stats.js"></script>
 <script>
@@ -464,22 +450,26 @@
 
   function sortirAFira() { window.location.href = '../../index.html'; }
 
-  const N = window.FIRA_NOTES;
   const F = window.FIRA_FIGURES;
 
-  function svgNota(nota) {
-    return `<div style="background:rgba(250,247,242,0.95);padding:8px;border-radius:8px;width:180px;height:110px;">${N.svgPentagrama(nota, { ample: 200, alt: 110 })}</div>`;
+  function preguntaFiguraBasica() {
+    const basiques = F.FIGURES.filter(f => ['rodona','blanca','negra'].includes(f.id));
+    const correcta = basiques[Math.floor(Math.random() * basiques.length)];
+    const dist = basiques.filter(f => f.id !== correcta.id);
+    return {
+      q: `<div class="figura-gran">${correcta.simbol}</div><div style="width:100%;">Quina figura és?</div>`,
+      options: [correcta.nom, ...dist.map(d => d.nom)],
+      correct: 0
+    };
   }
 
-  function preguntaNota(nivell) {
-    const correcta = N.aleatoria(nivell);
-    const dist = N.distractors(correcta, 2, nivell);
-    const opcions = [correcta, ...dist];
+  function preguntaSilenci() {
+    const correcta = F.aleatoria();
+    const dist = F.distractors(correcta, 2);
     return {
-      q: svgNota(correcta) + `<div style="font-family:'Cinzel',serif;width:100%;">Quina nota és?</div>`,
-      options: opcions.map(o => o.nom),
-      correct: 0,
-      _shuffleKey: correcta.nom
+      q: `<div class="figura-gran">${correcta.silenci}</div><div style="width:100%;">De quina figura és aquest silenci?</div>`,
+      options: [correcta.nom, ...dist.map(d => d.nom)],
+      correct: 0
     };
   }
 
@@ -536,6 +526,15 @@
     }
   }
 
+  function preguntaMixta() {
+    const r = Math.random();
+    if (r < 0.2) return preguntaFiguraBasica();
+    if (r < 0.4) return preguntaFigura();
+    if (r < 0.6) return preguntaSilenci();
+    if (r < 0.8) return preguntaValor();
+    return preguntaEquivalencia();
+  }
+
   function generarPool(generador, n) {
     const pool = [];
     for (let i = 0; i < n; i++) pool.push(generador());
@@ -544,24 +543,19 @@
 
   const NIVELLS_DERBY = [
     {
-      nom: "Notes en línia",
-      descripcio: "Mi · Sol · Si · Re · Fa",
-      poolFn: () => generarPool(() => preguntaNota(1), 18)
-    },
-    {
-      nom: "Notes en espai",
-      descripcio: "Fa · La · Do · Mi",
-      poolFn: () => generarPool(() => preguntaNota(2), 18)
-    },
-    {
-      nom: "Pentagrama complet",
-      descripcio: "Totes les notes",
-      poolFn: () => generarPool(() => preguntaNota(3), 20)
+      nom: "Figures bàsiques",
+      descripcio: "Rodona · blanca · negra",
+      poolFn: () => generarPool(preguntaFiguraBasica, 18)
     },
     {
       nom: "Reconèixer figures",
-      descripcio: "Rodona, blanca, negra…",
+      descripcio: "Totes les figures",
       poolFn: () => generarPool(preguntaFigura, 18)
+    },
+    {
+      nom: "Silencis",
+      descripcio: "El silenci de cada figura",
+      poolFn: () => generarPool(preguntaSilenci, 18)
     },
     {
       nom: "Valor de les figures",
@@ -572,6 +566,11 @@
       nom: "Equivalències",
       descripcio: "El gran repte",
       poolFn: () => generarPool(preguntaEquivalencia, 18)
+    },
+    {
+      nom: "Repte final",
+      descripcio: "Tot barrejat",
+      poolFn: () => generarPool(preguntaMixta, 20)
     }
   ];
 
@@ -805,61 +804,23 @@
   }
 
   // ============================================================
-  // TUTORIAL — pentagrama explicat línia per línia / espai per espai
+  // TUTORIAL — figures rítmiques i el seu silenci, símbol i valor
   // ============================================================
   function generarSvgTutorial() {
-    const w = 760, h = 200;
-    const xStart = 40, xEnd = w - 20;
-    const cyMi = 120;
-    const sep = 16;
-    const colorLin = '#5A2A1C';
     const colorVermell = '#C8102E';
     const colorDaurat = '#D4AF37';
+    const cols = F.FIGURES.map(f => `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:6px; min-width:110px;">
+        <div style="height:64px; display:flex; align-items:flex-end;">${F.svgFigura(f, { ample: 34, alt: 64, color: colorVermell })}</div>
+        <div style="font-family:'Alfa Slab One',Georgia,serif; font-size:1.05rem; color:${colorVermell};">${f.nom}</div>
+        <div style="font-family:'Cinzel',serif; font-size:0.85rem; color:var(--circ-vermell-fosc);">${f.valor} negr${f.valor === 1 ? 'a' : 'es'}</div>
+        <div style="width:70%; border-top:1px dashed ${colorDaurat}; margin:2px 0;"></div>
+        <div style="font-size:1.8rem; color:${colorDaurat};">${f.silenci}</div>
+        <div style="font-family:'Cinzel',serif; font-size:0.72rem; color:#8B6F1A;">el seu silenci</div>
+      </div>
+    `).join('');
 
-    const linies = [0, 1, 2, 3, 4].map(i => {
-      const y = cyMi - i * sep;
-      return `<line x1="${xStart}" y1="${y}" x2="${xEnd}" y2="${y}" stroke="${colorLin}" stroke-width="2"/>`;
-    }).join('');
-
-    const clauSol = `<g transform="translate(${xStart + 16} ${cyMi - 50}) scale(1.5)"
-                       fill="none" stroke="${colorDaurat}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                       <path d="M 11 8 C 4 14, 4 28, 12 34 C 22 40, 26 28, 18 22 C 10 18, 8 32, 14 36 L 16 54 C 16 62, 8 62, 8 56" />
-                       <circle cx="14" cy="59" r="3" fill="${colorDaurat}"/>
-                     </g>`;
-
-    // Línies: Mi (0), Sol (1), Si (2), Re (3), Fa (4) — de baix a dalt
-    const noms_linia = ['Mi', 'Sol', 'Si', 'Re', 'Fa'];
-    // Espais: Fa (0.5), La (1.5), Do (2.5), Mi (3.5)
-    const noms_espai = ['Fa', 'La', 'Do', 'Mi'];
-
-    let notes = '';
-    // Notes a les línies (cap negre)
-    noms_linia.forEach((nom, i) => {
-      const x = 180 + i * 65;
-      const y = cyMi - i * sep;
-      notes += `
-        <ellipse cx="${x}" cy="${y}" rx="9" ry="6.5" fill="${colorVermell}" transform="rotate(-20 ${x} ${y})"/>
-        <line x1="${x + 8}" y1="${y - 2}" x2="${x + 8}" y2="${y - 38}" stroke="${colorVermell}" stroke-width="2"/>
-        <text x="${x}" y="${cyMi + 50}" font-family="Alfa Slab One, Georgia, serif" font-size="20" fill="${colorVermell}" text-anchor="middle">${nom}</text>
-      `;
-    });
-    // Notes als espais (cap obert per diferenciar)
-    noms_espai.forEach((nom, i) => {
-      const x = 510 + i * 60;
-      const y = cyMi - (0.5 + i) * sep;
-      notes += `
-        <ellipse cx="${x}" cy="${y}" rx="9" ry="6.5" fill="none" stroke="${colorDaurat}" stroke-width="2.5" transform="rotate(-20 ${x} ${y})"/>
-        <line x1="${x + 8}" y1="${y - 2}" x2="${x + 8}" y2="${y - 38}" stroke="${colorDaurat}" stroke-width="2"/>
-        <text x="${x}" y="${cyMi + 50}" font-family="Alfa Slab One, Georgia, serif" font-size="20" fill="#8B6F1A" text-anchor="middle">${nom}</text>
-      `;
-    });
-
-    return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%;height:auto;">
-      ${linies}${clauSol}${notes}
-      <line x1="180" y1="50" x2="180" y2="60" stroke="${colorVermell}" stroke-width="1" stroke-dasharray="2 2"/>
-      <text x="365" y="40" font-family="Cinzel, serif" font-size="14" fill="${colorVermell}" text-anchor="middle" font-weight="700" letter-spacing="2">LÍNIES (vermell)</text>
-      <text x="600" y="40" font-family="Cinzel, serif" font-size="14" fill="#8B6F1A" text-anchor="middle" font-weight="700" letter-spacing="2">ESPAIS (daurat)</text>
-    </svg>`;
+    return `<div style="display:flex; justify-content:center; gap:22px; flex-wrap:wrap; padding:8px 0;">${cols}</div>`;
   }
 
   function obrirTutorial() {
