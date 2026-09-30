@@ -236,7 +236,7 @@
   <div class="kpi"><div class="num" id="kpi-partides">0</div><div class="lab">Partides</div></div>
   <div class="kpi"><div class="num" id="kpi-precisio">—</div><div class="lab">Precisió global</div></div>
   <div class="kpi"><div class="num" id="kpi-nivells">0</div><div class="lab">Nivells completats</div></div>
-  <div class="kpi"><div class="num" id="kpi-estrelles">0/15</div><div class="lab">Estrelles totals</div></div>
+  <div class="kpi"><div class="num" id="kpi-estrelles">0/5</div><div class="lab">Carpes fetes</div></div>
 </div>
 
 <div class="grid-jocs" id="grid-jocs"></div>
@@ -266,11 +266,8 @@
     });
   }
 
-  function renderEstrelles(n, max = 3) {
-    let html = '';
-    for (let i = 0; i < max; i++) html += `<span class="${i < n ? 'g' : ''}">★</span>`;
-    return html;
-  }
+  // FET = qualsevol estrella > 0
+  const renderFet = n => n > 0 ? '<span class="g">✓ Feta</span>' : '';
 
   function renderitzar() {
     const stats = FiraStats.obtenir();
@@ -278,7 +275,7 @@
     grid.innerHTML = '';
 
     let totalPartides = 0, totalEncerts = 0, totalErrors = 0;
-    let totalNivells = 0, totalEstrelles = 0;
+    let totalNivells = 0, totalFetes = 0;
 
     FiraStats.JOCS.forEach(id => {
       const j = stats[id];
@@ -287,7 +284,7 @@
       totalEncerts  += j.encerts;
       totalErrors   += j.errors;
       totalNivells  += j.nivellsCompletats;
-      totalEstrelles += j.millorEstrelles;
+      if (j.millorEstrelles > 0) totalFetes++;
 
       const precisio = j.precisio !== null ? `${j.precisio}%` : '—';
 
@@ -295,7 +292,7 @@
       card.className = 'targeta-joc';
       card.innerHTML = `
         <h2><span class="icona">${info.icona}</span>${info.nom}</h2>
-        <div class="estrelles-joc">${renderEstrelles(j.millorEstrelles)}</div>
+        <div class="estrelles-joc">${renderFet(j.millorEstrelles)}</div>
         <div class="estats-fila">
           <div class="estat"><div class="v">${j.partides}</div><div class="k">Partides</div></div>
           <div class="estat"><div class="v">${j.nivellsCompletats}</div><div class="k">Nivells</div></div>
@@ -316,7 +313,7 @@
     document.getElementById('kpi-partides').textContent = totalPartides;
     document.getElementById('kpi-precisio').textContent = precisioGlobal !== null ? `${precisioGlobal}%` : '—';
     document.getElementById('kpi-nivells').textContent = totalNivells;
-    document.getElementById('kpi-estrelles').textContent = `${totalEstrelles}/15`;
+    document.getElementById('kpi-estrelles').textContent = `${totalFetes}/${FiraStats.JOCS.length}`;
 
     if (totalPartides === 0) {
       grid.innerHTML = `<div class="sense-dades">

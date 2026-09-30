@@ -132,8 +132,8 @@
   </header>
 
   <div class="progres-global">
-    <span class="num" id="estrelles-total">0</span>
-    <span class="text">Estrelles guanyades de <span id="estrelles-max">15</span></span>
+    <span class="num" id="estrelles-total">✓ 0</span>
+    <span class="text">Carpes fetes de <span id="estrelles-max">5</span></span>
   </div>
 
   <div class="passeig" id="passeig"></div>
@@ -183,7 +183,7 @@
   ];
 
   const STORAGE_KEY = 'fira_musical_progres';
-  const DESBLOQUEIG_GRAN_TIR = 4;
+  const DESBLOQUEIG_GRAN_TIR = 4;   // carpes fetes (les 4 de base)
 
   function carregarProgres() {
     try {
@@ -198,20 +198,15 @@
     return p[idJoc] || 0;
   }
 
-  function estrellesTotalsBase() {
-    return CARPES.filter(c => c.id !== 'gran_tir').reduce((t, c) => t + estrelles(c.id), 0);
+  // FET = qualsevol estrella > 0 (també partides velles)
+  const feta = idJoc => estrelles(idJoc) > 0;
+
+  function carpesFetesBase() {
+    return CARPES.filter(c => c.id !== 'gran_tir' && feta(c.id)).length;
   }
 
   function granTirDesbloquejat() {
-    return estrellesTotalsBase() >= DESBLOQUEIG_GRAN_TIR;
-  }
-
-  function renderEstrelles(n) {
-    let html = '';
-    for (let i = 0; i < 3; i++) {
-      html += `<span class="${i < n ? 'guanyada' : ''}">★</span>`;
-    }
-    return html;
+    return carpesFetesBase() >= DESBLOQUEIG_GRAN_TIR;
   }
 
   function renderPasseig() {
@@ -219,12 +214,13 @@
     passeig.innerHTML = '';
 
     CARPES.forEach((carpa, idx) => {
-      const stars = estrelles(carpa.id);
+      const fet = feta(carpa.id);
       const bloquejat = carpa.bloquejat && !granTirDesbloquejat();
 
       const div = document.createElement('div');
       div.className = 'carpa entrada-carpa' + (bloquejat ? ' bloquejada' : '');
       div.style.animationDelay = `${idx * 0.08}s`;
+      div.setAttribute('aria-label', `${carpa.nom}${fet ? ', feta' : ''}${bloquejat ? ', bloquejada' : ''}`);
 
       div.innerHTML = `
         <div class="carpa-tendal"></div>
@@ -232,7 +228,7 @@
           <div class="carpa-icona">${carpa.icona}</div>
           <div class="carpa-nom">${carpa.nom}</div>
           <div class="carpa-descripcio">${carpa.descripcio}</div>
-          <div class="carpa-estrelles">${renderEstrelles(stars)}</div>
+          <div class="carpa-estrelles">${fet ? '<span class="guanyada">✓</span>' : ''}</div>
         </div>
         ${bloquejat ? '<div class="carpa-cadenat">🔒</div>' : ''}
       `;
@@ -252,14 +248,12 @@
   }
 
   function actualitzarComptador() {
-    const total = CARPES.reduce((t, c) => t + estrelles(c.id), 0);
-    const max = CARPES.length * 3;
-    document.getElementById('estrelles-total').textContent = total;
-    document.getElementById('estrelles-max').textContent = max;
+    document.getElementById('estrelles-total').textContent = `✓ ${CARPES.filter(c => feta(c.id)).length}`;
+    document.getElementById('estrelles-max').textContent = CARPES.length;
   }
 
   function mostrarMissatgeBloquejat() {
-    const falten = DESBLOQUEIG_GRAN_TIR - estrellesTotalsBase();
+    const falten = DESBLOQUEIG_GRAN_TIR - carpesFetesBase();
     const msg = document.createElement('div');
     msg.className = 'panel-glass';
     msg.style.cssText = `
@@ -271,7 +265,7 @@
       <div style="font-size:64px;margin-bottom:12px;">🔒</div>
       <div class="titol-circ" style="font-size:28px;margin-bottom:10px;">Carpa bloquejada</div>
       <div class="text-circ" style="font-size:15px;color:var(--circ-vermell-fosc);">
-        Et falten <strong style="color:var(--circ-vermell);">${falten} estrelles</strong>
+        Et falten <strong style="color:var(--circ-vermell);">${falten} ${falten === 1 ? 'carpa' : 'carpes'}</strong>
         per obrir el Gran Tir.
       </div>
     `;
