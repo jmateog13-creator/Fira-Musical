@@ -183,7 +183,6 @@
   ];
 
   const STORAGE_KEY = 'fira_musical_progres';
-  const DESBLOQUEIG_GRAN_TIR = 4;   // carpes fetes (les 4 de base)
 
   function carregarProgres() {
     try {
@@ -205,6 +204,9 @@
     return CARPES.filter(c => c.id !== 'gran_tir' && feta(c.id)).length;
   }
 
+  // El Gran Tir s'obre quan TOTES les carpes anteriors estan fetes (Javier,
+  // 30-09-2026). Es compta sobre CARPES perquè si se n'afegeix una, també entri.
+  const DESBLOQUEIG_GRAN_TIR = CARPES.filter(c => c.id !== 'gran_tir').length;
   function granTirDesbloquejat() {
     return carpesFetesBase() >= DESBLOQUEIG_GRAN_TIR;
   }
