@@ -54,8 +54,18 @@ window.FiraStats = (function() {
 
   // La Fira és un "examen" multi-atracció: la victòria és GLOBAL (les 5
   // atraccions visitades, no una atracció individual).
+  // 14-10-2026: abans n'hi havia prou amb UN nivell de cada atracció (un sol clic a
+  // Timbalers comptava). Ara cal tenir-les TOTES senceres, cadascuna amb el seu desat.
+  const llista = (k) => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch (e) { return []; } };
+  const SENCERA = {
+    derby: () => llista('derby_completed').filter(Boolean).length >= 6,
+    vident: () => llista('vident_played_v2').length >= 3,
+    pesca: () => llista('pesca_anecs_completed_v2').length >= 6,
+    gran_tir: () => llista('gran_tir_completed').length >= 6,
+    timbalers: (dades) => dades.timbalers.millorEstrelles >= 3,   // 6/6 timbals en una partida
+  };
   function checkFiraGlobal(dades) {
-    if (JOCS.every(id => dades[id].nivellsCompletats > 0)) {
+    if (JOCS.every(id => SENCERA[id](dades))) {
       window.AulaTechBridge.sendOnce('fira-musical', { completat: true });
     }
   }
@@ -102,6 +112,7 @@ window.FiraStats = (function() {
         break;
       case 'estrelles_actualitzades':
         if (info.estrelles > joc.millorEstrelles) joc.millorEstrelles = info.estrelles;
+        checkFiraGlobal(dades);   // Timbalers puja d'estrelles DESPRÉS del nivell_completat
         break;
     }
     desar(dades);
