@@ -16,7 +16,7 @@ if (!window.AulaTechBridge) {
       send(gameId, f) {
         f = f || {};
         const data = {
-          p_juego_id: String(gameId || 'fira-musical'), p_bloque: 'general', p_tema: null,
+          p_juego_id: String(gameId || 'fira-musical'), p_bloque: 'ritme', p_tema: null,
           p_completado: !!f.completat, p_precision: clamp01(f.precisio),
           p_errores: int(f.errors), p_racha_max: int(f.rachaMax),
           p_tiempo_ms: int(f.tempsMs === undefined ? Date.now() - this.t0 : f.tempsMs),
@@ -64,9 +64,17 @@ window.FiraStats = (function() {
     gran_tir: () => llista('gran_tir_completed').length >= 6,
     timbalers: (dades) => dades.timbalers.millorEstrelles >= 3,   // 6/6 timbals en una partida
   };
+  // Es marca quan el servidor ho ha desat (si no arriba, es reintenta al pròxim nivell).
+  const ENVIAT = 'fira_musical_enviat';
+  const desat = (d) => { if (d && d.completat) try { localStorage.setItem(ENVIAT, '1'); } catch (e) { /* privat */ } };
+  window.addEventListener('at-game-paid', (e) => desat(e.detail));
+  window.addEventListener('message', (e) => { const d = e.data || {}; if (d.source === 'aulatech-host' && d.action === 'GAME_RESULT') desat(d.data); });
   function checkFiraGlobal(dades) {
+    // 19-10-2026: un sol cop (no a cada nivell rejugat després) i amb precisió real.
+    if (localStorage.getItem(ENVIAT)) return;
     if (JOCS.every(id => SENCERA[id](dades))) {
-      window.AulaTechBridge.sendOnce('fira-musical', { completat: true });
+      const ok = JOCS.reduce((n, id) => n + dades[id].encerts, 0), ko = JOCS.reduce((n, id) => n + dades[id].errors, 0);
+      window.AulaTechBridge.sendOnce('fira-musical', { completat: true, errors: ko, perfecte: ko === 0, precisio: ok + ko ? ok / (ok + ko) : 1 });
     }
   }
 
@@ -194,6 +202,19 @@ window.FiraStats = (function() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: AK, Authorization: 'Bearer ' + tok },
       body: JSON.stringify(d.data),
-    }).catch(function () { /* sense xarxa: es perd la partida, però el joc no es trenca */ });
+    }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j) window.dispatchEvent(new CustomEvent('at-game-paid', { detail: j })); })
+      .catch(function () { /* sense xarxa: es perd la partida, però el joc no es trenca */ });
   });
+})();
+
+/* Cartell de final (at-final.js): abans les atraccions no el carregaven i en pestanya
+   pròpia no sortia mai. */
+(function () {
+  if (window.__atFinalCarregat) return;
+  window.__atFinalCarregat = true;
+  var s = document.createElement('script');
+  s.src = '/1.Gamificacion/_tools/at-final.js?v=3';
+  s.async = true;
+  document.head.appendChild(s);
 })();
