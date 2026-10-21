@@ -1,7 +1,7 @@
 /* ============================================================
    FIRA MUSICAL — Pool de NOTES MUSICALS
    Font: 5.Documentacion/03_Reglas_Temáticas_9Grid/Tema_02_Notes_Musicals.md
-   Clau de Sol, rang pràctic 1r-2n ESO (Do4 → La5).
+   Clau de Sol (Do4 → La5). No el carrega cap atracció.
    ============================================================ */
 
 window.FIRA_NOTES = (function() {

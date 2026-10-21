@@ -201,6 +201,17 @@
     transition: 0.12s;
   }
 
+  /* 21-10 · mòbil: abans el text de la pregunta i dels botons sortia de la caixa */
+  @media (max-width: 600px) {
+    #game-cabinet { width: 100vw; height: auto; min-height: 100vh; border-width: 8px; padding: 8px; }
+    header { flex-wrap: wrap; gap: 6px; padding: 8px; justify-content: center; }
+    header h1 { font-size: 1.15rem; order: -1; width: 100%; text-align: center; }
+    .pill { font-size: .75rem; padding: 6px 10px; letter-spacing: .04em; }
+    #question-display { font-size: 1rem; width: 100%; box-sizing: border-box; padding: 10px; }
+    #answers-container { flex-direction: column; align-items: stretch; gap: 8px; }
+    .ans-btn { width: 100%; font-size: .95rem; padding: 10px; }
+    #control-panel { height: auto; padding: 10px; }
+  }
   .ans-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--circ-daurat-fosc); }
   .ans-btn:hover:not(:disabled) { background: white; transform: translateY(-1px); }
   .ans-btn:disabled { cursor: default; opacity: 0.8; }
@@ -432,7 +443,7 @@
 </div>
 
 <script src="../../data/figures.js"></script>
-<script src="../../data/stats.js?v=3"></script>
+<script src="../../data/stats.js?v=5"></script>
 <script>
 
   const STORAGE_KEY = 'fira_musical_progres';
@@ -457,7 +468,7 @@
     const correcta = basiques[Math.floor(Math.random() * basiques.length)];
     const dist = basiques.filter(f => f.id !== correcta.id);
     return {
-      q: `<div class="figura-gran">${correcta.simbol}</div><div style="width:100%;">Quina figura és?</div>`,
+      q: `<div class="figura-gran">${F.svgFigura(correcta, { ample: 40, alt: 80, color: 'currentColor' })}</div><div style="width:100%;">Quina figura és?</div>`,
       options: [correcta.nom, ...dist.map(d => d.nom)],
       correct: 0
     };
@@ -467,7 +478,7 @@
     const correcta = F.aleatoria();
     const dist = F.distractors(correcta, 2);
     return {
-      q: `<div class="figura-gran">${correcta.silenci}</div><div style="width:100%;">De quina figura és aquest silenci?</div>`,
+      q: `<div class="figura-gran">${F.svgSilenci(correcta, { ample: 44, alt: 74, color: 'currentColor' })}</div><div style="width:100%;">De quina figura és aquest silenci?</div>`,
       options: [correcta.nom, ...dist.map(d => d.nom)],
       correct: 0
     };
@@ -477,7 +488,7 @@
     const correcta = F.aleatoria();
     const dist = F.distractors(correcta, 2);
     return {
-      q: `<div class="figura-gran">${correcta.simbol}</div><div style="width:100%;">Quina figura és?</div>`,
+      q: `<div class="figura-gran">${F.svgFigura(correcta, { ample: 40, alt: 80, color: 'currentColor' })}</div><div style="width:100%;">Quina figura és?</div>`,
       options: [correcta.nom, ...dist.map(d => d.nom)],
       correct: 0
     };
@@ -504,10 +515,13 @@
     const tipus = Math.random();
     if (tipus < 0.5) {
       const fig = F.FIGURES[Math.floor(Math.random() * 4)];
-      const correctaText = fig.simbol + ' = ' + fig.valor + ' negr' + (fig.valor === 1 ? 'a' : 'es');
+      // 21-10: text pla (el botó és innerText: el glif Unicode sortia buit a molts mòbils) i «1 negra», «mitja negra»
+      const negres = (v) => ({ 1: '1 negra', 0.5: 'mitja negra', 0.25: 'un quart de negra' }[v] || v + ' negres');
+      const una = 'Una ' + fig.nom.toLowerCase() + ' = ';
+      const correctaText = una + negres(fig.valor);
       return {
         q: `<div style="width:100%;">Quina equivalència és correcta?</div>`,
-        options: [correctaText, fig.simbol + ' = ' + (fig.valor * 2) + ' negres', fig.simbol + ' = ' + (fig.valor / 2) + ' negres'],
+        options: [correctaText, una + negres(fig.valor * 2), una + negres(fig.valor / 2)],
         correct: 0
       };
     } else {
@@ -664,6 +678,8 @@
 
       const trackWidth = document.getElementById('racetrack').offsetWidth;
       this.finishLine = trackWidth - 80;
+      // 21-10: la cursa són sempre 12 encerts (abans 42 px/encert: 5 en mòbil, ~38 en pantalla gran)
+      this.pas = (this.finishLine - 10) / 12;
 
       this.playFanfare();
 
@@ -681,13 +697,16 @@
 
     startHouseAI() {
       if (this.houseInterval) clearInterval(this.houseInterval);
-      const baseSpeed = 0.3 + (this.currentLevel * 0.12);
+      // 21-10: el rival triga el mateix a creuar la pista a qualsevol pantalla: 12 respostes
+      // a ~4,5 s cadascuna al nivell 1 i ~2,8 s al 6 (abans arribava a ~2 s, injust per a un examen).
       const mistakeChance = Math.max(0.05, 0.2 - (this.currentLevel * 0.025));
+      const segons = 4.5 - this.currentLevel * 0.34;
+      const baseSpeed = (this.finishLine - 10) / (12 * segons * 20) / (1 - mistakeChance);
 
       this.houseInterval = setInterval(() => {
         if (!this.isPlaying) return;
         if (Math.random() < mistakeChance) return;
-        const speed = baseSpeed + (Math.random() * 0.5);
+        const speed = baseSpeed * (0.5 + Math.random());
         this.housePos += speed;
         this.updatePositions();
         if (this.housePos >= this.finishLine) this.endRace('house');
@@ -728,7 +747,7 @@
 
       if (isCorrect) {
         this.playGallop();
-        this.playerPos += 42;
+        this.playerPos += this.pas;
         this.updatePositions();
         btnElement.classList.add('correct');
         window.FiraStats && FiraStats.registrar('derby', 'encert');
@@ -738,7 +757,7 @@
       } else {
         this.playTone(150, 'sawtooth', 0.3);
         btnElement.classList.add('wrong');
-        this.playerPos = Math.max(0, this.playerPos - 10);
+        this.playerPos = Math.max(0, this.playerPos - this.pas / 4);
         this.updatePositions();
         window.FiraStats && FiraStats.registrar('derby', 'error');
         setTimeout(() => { if (this.isPlaying) this.nextQuestion(); }, 700);
@@ -813,9 +832,9 @@
       <div style="display:flex; flex-direction:column; align-items:center; gap:6px; min-width:110px;">
         <div style="height:64px; display:flex; align-items:flex-end;">${F.svgFigura(f, { ample: 34, alt: 64, color: colorVermell })}</div>
         <div style="font-family:'Alfa Slab One',Georgia,serif; font-size:1.05rem; color:${colorVermell};">${f.nom}</div>
-        <div style="font-family:'Cinzel',serif; font-size:0.85rem; color:var(--circ-vermell-fosc);">${f.valor} negr${f.valor === 1 ? 'a' : 'es'}</div>
+        <div style="font-family:'Cinzel',serif; font-size:0.85rem; color:var(--circ-vermell-fosc);">${({ 1: '1 negra', 0.5: 'mitja negra', 0.25: 'un quart de negra' })[f.valor] || f.valor + ' negres'}</div>
         <div style="width:70%; border-top:1px dashed ${colorDaurat}; margin:2px 0;"></div>
-        <div style="font-size:1.8rem; color:${colorDaurat};">${f.silenci}</div>
+        <div style="color:${colorDaurat};">${F.svgSilenci(f, { ample: 30, alt: 50, color: colorDaurat })}</div>
         <div style="font-family:'Cinzel',serif; font-size:0.72rem; color:#8B6F1A;">el seu silenci</div>
       </div>
     `).join('');

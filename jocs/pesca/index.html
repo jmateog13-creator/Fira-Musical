@@ -301,7 +301,7 @@
 </div>
 
 <script src="../../data/figures.js"></script>
-<script src="../../data/stats.js?v=3"></script>
+<script src="../../data/stats.js?v=5"></script>
 <script>
 
   const STORAGE_KEY = 'fira_musical_progres';
@@ -377,7 +377,7 @@
         const fig = F.aleatoria();
         const esSilenci = Math.random() < 0.5;
         const label = esSilenci
-          ? `<span style="font-size:2.2rem;">${fig.silenci}</span>`
+          ? F.svgSilenci(fig, { ample: 30, alt: 48, color: '#C8102E' })
           : F.svgFigura(fig, { ample: 30, alt: 48, color: '#C8102E' });
         return { label, classe: esSilenci ? 'nom' : 'figura', isCorrect: esSilenci };
       }
@@ -482,13 +482,16 @@
     ducks.push(d);
   }
 
-  function gameLoop() {
-    if (!gameActive) return;
+  // 21-10: velocitat per temps, no per fotograma (a 120 Hz els ànecs anaven al doble)
+  let tLoop = 0;
+  function gameLoop(ts) {
+    if (!gameActive) { tLoop = 0; return; }
+    const k = tLoop && ts ? Math.min(3, (ts - tLoop) / 16.67) : 1; tLoop = ts || 0;
     const now = Date.now();
     const poolW = document.getElementById('pool').clientWidth;
     ducks.forEach(d => {
       if (!d.active) return;
-      d.x += d.speed;
+      d.x += d.speed * k;
       const wobble = Math.sin((now / 500) + d.wobbleOffset) * 5;
       d.element.style.left = d.x + 'px';
       d.element.style.transform = `translateY(${wobble}px)`;

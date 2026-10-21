@@ -1,7 +1,7 @@
 /* ============================================================
    FIRA MUSICAL — Pool de FIGURES RÍTMIQUES
    Font: 5.Documentacion/03_Reglas_Temáticas_9Grid/Tema_01_Figures_Ritmiques.md
-   Rang 1r-2n ESO: redona → semicorxera + silencis + puntet.
+   Rang de la Fira (examen de 3r): rodona → semicorxera + silencis + puntet.
    ============================================================ */
 
 window.FIRA_FIGURES = (function() {
@@ -10,6 +10,7 @@ window.FIRA_FIGURES = (function() {
     {
       id: 'rodona', nom: 'Rodona', simbol: '𝅝', valor: 4,
       silenci: '𝄻', nomSilenci: 'Silenci de rodona',
+      pistesSilenci: ["Sóc el silenci més llarg de tots.", "Sóc un rectangle negre que penja d'una línia.", "Callo el mateix que 4 negres.", "En un 4/4, jo sol deixo tot el compàs en silenci."],   // 21-10: el Vident donava les pistes de la figura per endevinar el silenci
       pistes: [
         "Sóc la més llarga de les figures comunes.",
         "Es dibuixa com un cap obert, sense pal.",
@@ -22,18 +23,20 @@ window.FIRA_FIGURES = (function() {
     {
       id: 'blanca', nom: 'Blanca', simbol: '𝅗𝅥', valor: 2,
       silenci: '𝄼', nomSilenci: 'Silenci de blanca',
+      pistesSilenci: ["Sóc un rectangle negre, com el silenci de rodona.", "Però jo no penjo: sec damunt de la línia.", "Callo el mateix que 2 negres.", "En un 4/4 en caben exactament 2 com jo."],   // 21-10: el Vident donava les pistes de la figura per endevinar el silenci
       pistes: [
         "Tinc el cap obert i un pal.",
         "Duro la meitat d'una rodona.",
         "Equivalo a 2 negres.",
         "En un 4/4 caben exactament 2 com jo.",
         "Sóc el cor del vals: el pas-llarg de l'1-2-3.",
-        "A «Cumpleaños feliz», l'última nota llarga sóc jo."
+        "Si em poses un puntet, duro 3 temps."
       ]
     },
     {
       id: 'negra', nom: 'Negra', simbol: '♩', valor: 1,
       silenci: '𝄽', nomSilenci: 'Silenci de negra',
+      pistesSilenci: ["Tinc forma de llamp, en ziga-zaga.", "Callo 1 pulsació.", "En un 4/4 en caben 4 com jo.", "Sóc el silenci de la figura que marca el pols."],   // 21-10: el Vident donava les pistes de la figura per endevinar el silenci
       pistes: [
         "Sóc la unitat bàsica de pulsació.",
         "Tinc el cap negre i un pal.",
@@ -46,6 +49,7 @@ window.FIRA_FIGURES = (function() {
     {
       id: 'corxera', nom: 'Corxera', simbol: '♪', valor: 0.5,
       silenci: '𝄾', nomSilenci: 'Silenci de corxera',
+      pistesSilenci: ["Tinc un puntet i una sola cueta.", "Callo mig temps.", "Dos com jo fan el mateix que un silenci de negra.", "En un 4/4 en caben 8 com jo."],   // 21-10: el Vident donava les pistes de la figura per endevinar el silenci
       pistes: [
         "Tinc cap negre, pal i una banderola.",
         "Duro la meitat d'una negra.",
@@ -58,6 +62,7 @@ window.FIRA_FIGURES = (function() {
     {
       id: 'semicorxera', nom: 'Semicorxera', simbol: '𝅘𝅥𝅯', valor: 0.25,
       silenci: '𝄿', nomSilenci: 'Silenci de semicorxera',
+      pistesSilenci: ["Tinc dos puntets i dues cuetes.", "Callo un quart de temps.", "Quatre com jo fan un silenci de negra.", "En un 4/4 en caben 16 com jo."],   // 21-10: el Vident donava les pistes de la figura per endevinar el silenci
       pistes: [
         "Tinc cap negre, pal i dues banderoles.",
         "Duro la meitat d'una corxera.",
@@ -189,13 +194,25 @@ window.FIRA_FIGURES = (function() {
             </svg>`;
   }
 
+  // 21-10: abans tots els silencis eren el mateix rectangle i els jocs feien servir
+  // glifs Unicode (𝄻𝄼𝄽…), que a molts mòbils surten com a quadrats buits.
   function svgSilenci(figura, opcions = {}) {
-    const color = opcions.color || '#D4AF37';
+    const c = opcions.color || '#D4AF37';
     const ample = opcions.ample || 30;
     const alt   = opcions.alt   || 50;
-    return `<svg viewBox="0 0 30 50" xmlns="http://www.w3.org/2000/svg"
+    const st = `stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+    const linia = (y) => `<line x1="3" y1="${y}" x2="27" y2="${y}" stroke="${c}" stroke-width="1.4" opacity=".55"/>`;
+    const formes = {
+      rodona: linia(20) + `<rect x="8" y="20" width="14" height="7" fill="${c}"/>`,   // penja de la línia
+      blanca: linia(27) + `<rect x="8" y="20" width="14" height="7" fill="${c}"/>`,   // seu sobre la línia
+      negra: `<path d="M12 7 L19 16 L13 24 L19 32" ${st}/><path d="M19 32 Q9 29 14 43" ${st}/>`,
+      corxera: `<circle cx="11" cy="16" r="3.4" fill="${c}"/><path d="M11 18 Q16 20 21 14 L13 42" ${st}/>`,
+      semicorxera: `<circle cx="12" cy="11" r="3.2" fill="${c}"/><circle cx="10" cy="22" r="3.2" fill="${c}"/>` +
+        `<path d="M12 13 Q17 15 22 9 L12 44" ${st}/><path d="M10 24 Q15 26 19.6 20" ${st}/>`,
+    };
+    return `<svg viewBox="0 0 30 50" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${figura.nomSilenci || 'Silenci'}"
              style="display:inline-block;vertical-align:middle;width:${ample}px;height:${alt}px;">
-             <rect x="9" y="22" width="12" height="6" fill="${color}"/>
+             ${formes[figura.id] || formes.negra}
             </svg>`;
   }
 

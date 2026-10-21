@@ -388,7 +388,7 @@
 </div>
 
 <script src="../../data/figures.js"></script>
-<script src="../../data/stats.js?v=3"></script>
+<script src="../../data/stats.js?v=5"></script>
 <script>
 
   const STORAGE_KEY = 'fira_musical_progres';
@@ -403,7 +403,7 @@
   const F = window.FIRA_FIGURES;
 
   const iconaSvg = (figId) => F.svgFigura(F.MAPA[figId], { ample: 38, alt: 64, color: '#C8102E' });
-  const iconaSilenci = () => `<div style="font-size:2.6rem;color:#C8102E;">${F.MAPA.negra.silenci}</div>`;
+  const iconaSilenci = () => `<div>${F.svgSilenci(F.MAPA.negra, { ample: 40, alt: 66, color: '#C8102E' })}</div>`;
 
   const CATEGORIES = [
     {
@@ -421,7 +421,7 @@
       id: 'figures_avancades',
       nom: 'Figures avançades',
       iconaHtml: iconaSvg('corxera'),
-      descripcio: 'Corxera · semicorxera',
+      descripcio: 'Les cinc figures, de la rodona a la semicorxera',
       genPool: () => F.FIGURES.map(f => ({
         concepte: f.nom,
         pistes: f.pistes,
@@ -435,7 +435,7 @@
       descripcio: 'El silenci de cada figura',
       genPool: () => F.FIGURES.map(f => ({
         concepte: f.nomSilenci,
-        pistes: f.pistes,
+        pistes: f.pistesSilenci,
         opcions: F.FIGURES.map(x => x.nomSilenci)
       }))
     }
@@ -555,6 +555,10 @@
   }
 
   function checkAnswer(ans, correcte) {
+    // 21-10: un sol clic per visió (abans un doble toc comptava dues vegades i deixava provar-ne una altra)
+    const botons = document.querySelectorAll('.option-button');
+    if ([...botons].some(b => b.disabled)) return;
+    botons.forEach(b => { b.disabled = true; });
     clearInterval(clueInterval);
     const ball = document.getElementById('crystal-ball');
 

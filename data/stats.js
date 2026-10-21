@@ -37,6 +37,7 @@ if (!window.AulaTechBridge) {
 }
 
 window.FiraStats = (function() {
+  let tPagina = Date.now();
 
   const KEY = 'fira_musical_stats';
 
@@ -50,7 +51,7 @@ window.FiraStats = (function() {
     tempsTotal: 0
   });
 
-  const JOCS = ['derby', 'vident', 'timbalers', 'pesca', 'gran_tir'];
+  const JOCS = ['derby', 'vident', 'timbalers', 'pesca', 'gran_tir', 'examen'];   // 21-10: + la prova de síntesi
 
   // La Fira és un "examen" multi-atracció: la victòria és GLOBAL (les 5
   // atraccions visitades, no una atracció individual).
@@ -63,6 +64,7 @@ window.FiraStats = (function() {
     pesca: () => llista('pesca_anecs_completed_v2').length >= 6,
     gran_tir: () => llista('gran_tir_completed').length >= 6,
     timbalers: (dades) => dades.timbalers.millorEstrelles >= 3,   // 6/6 timbals en una partida
+    examen: () => { try { return localStorage.getItem('fira_examen_superat') === '1'; } catch (e) { return false; } },   // 9/12 a la síntesi
   };
   // Es marca quan el servidor ho ha desat (si no arriba, es reintenta al pròxim nivell).
   const ENVIAT = 'fira_musical_enviat';
@@ -74,7 +76,7 @@ window.FiraStats = (function() {
     if (localStorage.getItem(ENVIAT)) return;
     if (JOCS.every(id => SENCERA[id](dades))) {
       const ok = JOCS.reduce((n, id) => n + dades[id].encerts, 0), ko = JOCS.reduce((n, id) => n + dades[id].errors, 0);
-      window.AulaTechBridge.sendOnce('fira-musical', { completat: true, errors: ko, perfecte: ko === 0, precisio: ok + ko ? ok / (ok + ko) : 1 });
+      window.AulaTechBridge.sendOnce('fira-musical', { completat: true, tempsMs: JOCS.reduce((n, id) => n + (dades[id].tempsTotal || 0), 0) || undefined, errors: ko, perfecte: ko === 0, precisio: ok + ko ? ok / (ok + ko) : 1 });
     }
   }
 
@@ -116,6 +118,8 @@ window.FiraStats = (function() {
         break;
       case 'nivell_completat':
         joc.nivellsCompletats++;
+        // 21-10: temps de l'examen = suma del joc a totes les atraccions (abans només l'última pàgina)
+        joc.tempsTotal = (joc.tempsTotal || 0) + (Date.now() - tPagina); tPagina = Date.now();
         checkFiraGlobal(dades);
         break;
       case 'estrelles_actualitzades':
@@ -125,6 +129,9 @@ window.FiraStats = (function() {
     }
     desar(dades);
   }
+
+  // 21-10: el hub posa ✓ només quan l'atracció compta per a l'examen
+  function sencera(id) { const d = carregar(); return !!(SENCERA[id] && SENCERA[id](d)); }
 
   function obtenir() {
     const dades = carregar();
@@ -173,7 +180,7 @@ window.FiraStats = (function() {
     return files.map(f => f.join(';')).join('\n');
   }
 
-  return { registrar, obtenir, reset, exportarCSV, JOCS };
+  return { registrar, obtenir, reset, exportarCSV, JOCS, sencera };
 })();
 
 /* ── Sortida directa quan el joc s'obre en pestanya pròpia ───────────────────

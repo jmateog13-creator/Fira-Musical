@@ -15,7 +15,8 @@
   })();
 
   function escalar() {
-    const escala = window.innerWidth / ANCHO_DISENO;
+    // 21-10: en mòbil (<900 px) el zoom 375/1920 = 0,2 deixava el text a 3 px: allà el CSS ja reflueix sol.
+    const escala = window.innerWidth < 900 ? 1 : window.innerWidth / ANCHO_DISENO;
     const b = document.body;
     if (escala < 1) {
       if (suportaZoom) {

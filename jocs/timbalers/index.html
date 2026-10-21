@@ -2,6 +2,7 @@
 <html lang="ca">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Timbalers del Compàs — Fira Musical</title>
 <link rel="stylesheet" href="../../style.css">
 <style>
@@ -219,6 +220,9 @@
     line-height: 1.1;
   }
 
+  /* 21-10: la suma i els valors sortien ABANS de respondre (deien la resposta). Ara es revelen en corregir. */
+  .drum-label .compt, .fig-amb-valor .val { visibility: hidden; }
+  .revelat .drum-label .compt, .revelat .fig-amb-valor .val { visibility: visible; }
   .drum-label .compt {
     margin-top: 6px;
     font-family: 'Cinzel', serif;
@@ -312,6 +316,17 @@
     color: var(--circ-vermell-fosc);
   }
   .legenda strong { color: var(--circ-vermell); font-family: 'Cinzel', serif; }
+  /* 21-10 · mòbil: els tres timbals (920 px fixos) sortien de la pantalla */
+  @media (max-width: 700px) {
+    #stage { width: 100%; height: auto; flex-direction: column; align-items: center; gap: 6px; padding: 0 12px; margin-top: 12px; }
+    .drum-container { width: 100%; max-width: 340px; height: auto; flex-direction: row; justify-content: space-between; gap: 8px; }
+    .drum-label { width: auto; flex: 1; margin-bottom: 0; }
+    .drum-img { width: 72px; height: 72px; }
+    #volume-container { display: none; }
+    #ui-container { position: static; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 8px; }
+    h1.titol-circ-tb { font-size: 1.6rem; }
+    #question-board { width: auto; margin: 8px 12px 0; }
+  }
 </style>
 <script src="../../data/escalat.js" defer></script>
 </head>
@@ -369,7 +384,7 @@
 <div id="feedback-overlay">JACKPOT!</div>
 
 <script src="../../data/figures.js"></script>
-<script src="../../data/stats.js?v=3"></script>
+<script src="../../data/stats.js?v=5"></script>
 <script>
 
   const STORAGE_KEY = 'fira_musical_progres';
@@ -408,13 +423,9 @@
     loadLevel();
   }
 
-  function formatValor(v) {
-    if (v === 4) return '4';
-    if (v === 2) return '2';
-    if (v === 1) return '1';
-    if (v === 0.5) return '½';
-    if (v === 0.25) return '¼';
-    return String(v);
+  function formatValor(v) {   // 21-10: 4,5 → «4½» (abans «4.5»)
+    const w = Math.floor(v + 1e-9), F8 = ['', '⅛', '¼', '⅜', '½', '⅝', '¾', '⅞'][Math.round((v - w) * 8)] || '';
+    return (w || !F8 ? String(w) : '') + F8;
   }
 
   function seqHtml(figures) {
@@ -437,6 +448,7 @@
     }
 
     isInputLocked = true;
+    document.body.classList.remove('revelat');
     const compas = PROGRESSIO_COMPASSOS[currentLevelIndex];
 
     document.getElementById('level-indicator').textContent = `${currentLevelIndex + 1}/${TOTAL_NIVELLS}`;
@@ -444,16 +456,20 @@
     document.getElementById('instruction-text').textContent = `Quina seqüència suma exactament ${compas.pulsos} pulsacions?`;
 
     const valid = F.generarCompasValid(compas);
-    const inv1 = F.generarCompasInvalid(compas);
-    const inv2 = F.generarCompasInvalid(compas);
+    // 21-10: els falsos eren curts (2-4 figures) i el bo llarg: es veia per la mida.
+    // Ara un fals és el bo amb UNA figura canviada per una d'un altre valor.
+    const quasi = () => { const q = valid.slice(), k = Math.floor(Math.random() * q.length);
+      const alt = F.FIGURES.filter(f => f.valor !== q[k].valor && f.valor < compas.pulsos); q[k] = alt[Math.floor(Math.random() * alt.length)]; return q; };
+    const inv1 = quasi();
+    const inv2 = quasi();
 
     while (F.validarCompas(inv1, compas) || JSON.stringify(inv1) === JSON.stringify(inv2)) {
-      const nou = F.generarCompasInvalid(compas);
+      const nou = quasi();
       inv1.length = 0;
       inv1.push(...nou);
     }
     while (F.validarCompas(inv2, compas) || JSON.stringify(inv1) === JSON.stringify(inv2)) {
-      const nou = F.generarCompasInvalid(compas);
+      const nou = quasi();
       inv2.length = 0;
       inv2.push(...nou);
     }
@@ -488,6 +504,7 @@
     isInputLocked = true;
 
     for (let i = 0; i < 3; i++) document.getElementById(`drum-${i}`).classList.add('locked');
+    document.body.classList.add('revelat');
 
     const drumImg = document.getElementById(`drum-img-${clickedDrumId}`);
     const feedback = document.getElementById('feedback-overlay');

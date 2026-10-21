@@ -336,6 +336,12 @@
   #hud .regla-pill svg { vertical-align: middle; }
 
   .hidden { display: none !important; }
+  /* 21-10 · mòbil: el volum tapava el marcador i la mira de ratolí no té sentit amb el dit */
+  @media (max-width: 700px) {
+    #audio-panel { display: none; }
+    #hud { flex-wrap: wrap; gap: 4px 10px; justify-content: center; font-size: .9rem; }
+  }
+  @media (pointer: coarse) { #crosshair { display: none; } }
 </style>
 <script src="../../data/escalat.js" defer></script>
 </head>
@@ -400,7 +406,7 @@
 </div>
 
 <script src="../../data/figures.js"></script>
-<script src="../../data/stats.js?v=3"></script>
+<script src="../../data/stats.js?v=5"></script>
 <script>
 
   const STORAGE_KEY = 'fira_musical_progres';
@@ -421,7 +427,7 @@
 
   function dianaSilenci() {
     const fig = F.aleatoria();
-    return { label: `<span style="font-size:1.9rem;color:#C8102E;">${fig.silenci}</span>`, classe: 'figura', tipus: 'silenci', figura: fig };
+    return { label: F.svgSilenci(fig, { ample: 30, alt: 50, color: '#C8102E' }), classe: 'figura', tipus: 'silenci', figura: fig };
   }
 
   function dianaQualsevol() {
@@ -617,8 +623,10 @@
     if (!gameActive) return;
     const lane = 1 + Math.floor(Math.random() * 3);
     const shelf = document.getElementById(`shelf-${lane}`);
-    const d = modeActual.generador();
-    const correcte = reglaActiva.esCorrect(d);
+    // 21-10: abans només un 10% de dianes eren bones a «negres»/«silenci de negra» i calien 12 encerts
+    // en 60 s → gairebé impossible. Ara ~35% compleixen la regla activa.
+    let d = modeActual.generador();
+    if (Math.random() < 0.35) for (let k = 0; k < 40 && !reglaActiva.esCorrect(d); k++) d = modeActual.generador();
 
     const el = document.createElement('div');
     el.className = 'target';
@@ -635,16 +643,19 @@
     targets.push({
       element: el, x: startX,
       speed: (Math.random() * 2 + 2) * direction,
-      isCorrect: correcte, active: true
+      d, active: true
     });
   }
 
-  function gameLoop() {
-    if (!gameActive) return;
+  // 21-10: velocitat per temps, no per fotograma (a 120 Hz les dianes anaven al doble)
+  let tLoop = 0;
+  function gameLoop(ts) {
+    if (!gameActive) { tLoop = 0; return; }
+    const k = tLoop && ts ? Math.min(3, (ts - tLoop) / 16.67) : 1; tLoop = ts || 0;
     const rangeW = document.getElementById('range').clientWidth;
     targets.forEach(t => {
       if (!t.active) return;
-      t.x += t.speed;
+      t.x += t.speed * k;
       t.element.style.left = t.x + 'px';
       if ((t.speed > 0 && t.x > rangeW + 120) || (t.speed < 0 && t.x < -120)) {
         t.element.remove();
@@ -672,7 +683,7 @@
 
   function hitTarget(t) {
     t.active = false;
-    if (t.isCorrect) {
+    if (reglaActiva.esCorrect(t.d)) {   // 21-10: es jutja amb la regla d'ara (al CAOS canvia amb dianes en pantalla)
       score += 50;
       playSound('hit');
       window.FiraStats && FiraStats.registrar('gran_tir', 'encert');
@@ -752,7 +763,7 @@
     let e = 0;
     if (n >= 1) e = 1;
     if (n >= 3) e = 2;
-    if (n >= 5) e = 3;
+    if (n >= MODES.length) e = 3;   // 21-10: 3★ = els 6 modes (el que demana l'examen)
     desarEstrellesJoc('gran_tir', e);
     window.FiraStats && FiraStats.registrar('gran_tir', 'estrelles_actualitzades', { estrelles: e });
   }

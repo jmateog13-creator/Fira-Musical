@@ -126,9 +126,9 @@
     </div>
     <h1 class="titol-circ">Fira Musical</h1>
     <div class="marc-cartell">
-      <div class="subtitol">Llenguatge Musical · 1r i 2n d'ESO</div>
+      <div class="subtitol">Llenguatge Musical · Examen de ritme · 3r d'ESO</div>
     </div>
-    <div class="info-curs">5 atraccions · Figures Rítmiques</div>
+    <div class="info-curs">6 carpes · Tot el ritme de 3r</div>
   </header>
 
   <div class="progres-global">
@@ -138,10 +138,11 @@
 
   <div class="passeig" id="passeig"></div>
 
-  <a href="../../../_gimnas_1r/index.html?q=ritme" class="fira-menu-general">‹ Menú general</a>
+  <a href="../../../_gimnas/index.html#q/ritme" class="fira-menu-general">‹ Menú general</a>
 </div>
 
 
+<script src="data/stats.js?v=5"></script>
 <script>
   const CARPES = [
     {
@@ -179,6 +180,13 @@
       descripcio: 'El repte final. Tot barrejat.',
       ruta: 'jocs/gran_tir/index.html',
       bloquejat: true
+    },
+    {
+      id: 'examen',
+      nom: "La Carpa de l'Examen",
+      icona: '📜',
+      descripcio: 'Dotze preguntes de tot el ritme de 3r.',
+      ruta: 'jocs/examen/index.html'
     }
   ];
 
@@ -199,14 +207,15 @@
 
   // FET = qualsevol estrella > 0 (també partides velles)
   const feta = idJoc => estrelles(idJoc) > 0;
+  const sencera = idJoc => !!(window.FiraStats && FiraStats.sencera(idJoc));
 
   function carpesFetesBase() {
-    return CARPES.filter(c => c.id !== 'gran_tir' && feta(c.id)).length;
+    return CARPES.filter(c => c.id !== 'gran_tir' && c.id !== 'examen' && feta(c.id)).length;
   }
 
   // El Gran Tir s'obre quan TOTES les carpes anteriors estan fetes (Javier,
   // 30-09-2026). Es compta sobre CARPES perquè si se n'afegeix una, també entri.
-  const DESBLOQUEIG_GRAN_TIR = CARPES.filter(c => c.id !== 'gran_tir').length;
+  const DESBLOQUEIG_GRAN_TIR = CARPES.filter(c => c.id !== 'gran_tir' && c.id !== 'examen').length;
   function granTirDesbloquejat() {
     return carpesFetesBase() >= DESBLOQUEIG_GRAN_TIR;
   }
@@ -230,7 +239,7 @@
           <div class="carpa-icona">${carpa.icona}</div>
           <div class="carpa-nom">${carpa.nom}</div>
           <div class="carpa-descripcio">${carpa.descripcio}</div>
-          <div class="carpa-estrelles">${fet ? '<span class="guanyada">✓</span>' : ''}</div>
+          <div class="carpa-estrelles">${sencera(carpa.id) ? '<span class="guanyada">✓</span>' : fet ? '<span class="guanyada" style="opacity:.55" title="Comença­da: acaba-la sencera perquè compti a l\'examen">◐</span>' : ''}</div>
         </div>
         ${bloquejat ? '<div class="carpa-cadenat">🔒</div>' : ''}
       `;
@@ -250,8 +259,11 @@
   }
 
   function actualitzarComptador() {
-    document.getElementById('estrelles-total').textContent = `✓ ${CARPES.filter(c => feta(c.id)).length}`;
+    // 21-10: abans comptava qualsevol estrella; ara només les atraccions senceres (les que compten a l'examen)
+    const n = CARPES.filter(c => sencera(c.id)).length;
+    document.getElementById('estrelles-total').textContent = `✓ ${n}`;
     document.getElementById('estrelles-max').textContent = CARPES.length;
+    if (n === CARPES.length) document.querySelector('.progres-global .text').innerHTML = 'Totes les carpes senceres: <b>examen aprovat</b>';
   }
 
   function mostrarMissatgeBloquejat() {

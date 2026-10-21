@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Carpa de l'Examen — Fira Musical</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  /* 21-10-2026 · «que sigui un resum de tot»: la prova de síntesi de ritme de 3r dins la Fira */
+  body { min-height: 100vh; margin: 0; }
+  .examen { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; padding: 22px 14px 40px; text-align: center; }
+  .examen h1 { margin: 6px 0 4px; }
+  .examen .intro { color: var(--circ-vermell-fosc); font-size: 15px; margin: 0 auto 16px; max-width: 560px; }
+  #sintesi { --s3-panel: var(--circ-crema); --s3-ink: var(--circ-negre-vellut); --s3-accent: var(--circ-vermell);
+    --s3-soft: rgba(200,16,46,.08); --s3-font: 'Cinzel', Georgia, serif; }
+  #sintesi .s3 { border: 3px solid var(--circ-daurat); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+  #sintesi .s3-op svg { color: var(--circ-vermell); }
+  .tornar { margin-top: 18px; font-family: 'Cinzel', Georgia, serif; font-weight: 700; letter-spacing: .08em; padding: 10px 20px;
+    border-radius: 999px; border: 2px solid var(--circ-daurat); background: var(--circ-crema); color: var(--circ-vermell-fosc); cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="fons-circ"></div>
+<div class="examen">
+  <h1 class="titol-circ">📜 La Carpa de l'Examen</h1>
+  <p class="intro">Dotze preguntes de tot el ritme de 3r: figures i silencis, puntet, lligadura, compassos simples i compostos,
+    treset, síncopa, i un dictat i un accent per escoltar (puja el volum). Calen <b>9 encerts</b>.</p>
+  <div id="sintesi"></div>
+  <button class="tornar" onclick="location.href='../../index.html'">⬅ TORNAR A LA FIRA</button>
+</div>
+<script src="../../data/stats.js?v=5"></script>
+<script src="../../../../_comu/sintesi3r.js?v=2"></script>
+<script>
+  const STORAGE_KEY = 'fira_musical_progres';
+  Sintesi3r.mount(document.getElementById('sintesi'), {
+    titol: 'La Carpa de l\'Examen', titolOk: 'Examen superat!', boto: 'TORNAR A LA FIRA',
+    onAnswer: (bo) => window.FiraStats && FiraStats.registrar('examen', bo ? 'encert' : 'error'),
+    onPass: () => {
+      try {
+        localStorage.setItem('fira_examen_superat', '1');
+        const p = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); p.examen = 3; localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+      } catch (e) { /* privat */ }
+      window.FiraStats && FiraStats.registrar('examen', 'nivell_completat');
+      setTimeout(() => { location.href = '../../index.html'; }, 400);
+    },
+  });
+  window.FiraStats && FiraStats.registrar('examen', 'partida_iniciada');
+</script>
+</body>
+</html>
